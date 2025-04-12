@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { buttonVariants } from "./ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export function SignInForm() {
   const { data: session, status } = useSession(); // get session + status
@@ -13,10 +14,14 @@ export function SignInForm() {
   // ✅ Watch for login success
   useEffect(() => {
     if (status === "authenticated") {
-      // Optional: Add toast/alert here before redirect
+      Swal.fire({
+        icon: "success",
+        title: `Welcome back, ${session?.user?.name ?? "user"}!`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
       router.refresh(); // Refresh the session
       router.push("/"); // Redirect to homepage or dashboard
-      console.log(session);
     }
   }, [status, router]);
 
@@ -38,7 +43,11 @@ export function SignInForm() {
     setLoading(false);
 
     if (res?.error) {
-      alert("Invalid credentials");
+      Swal.fire({
+        icon: "error",
+        title: "Login failed",
+        text: "Invalid credentials, please try again.",
+      });
     }
   };
 

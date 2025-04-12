@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { User } from '@/models/User'
 import { verifyPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'
