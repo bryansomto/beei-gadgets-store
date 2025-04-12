@@ -118,7 +118,7 @@ function ReviewGrid() {
   return (
     <div
       ref={containerRef}
-      className="relative -mx-4 mt-16 grid h-[49rem] max-h-[150vh] grid-cols-1 items-start gap-8 overflow-hidden px-4 sm:mt-20 md:grid-cols-2 lg:grid-cols-3"
+      className="blur-md relative -mx-4 mt-16 grid h-[30rem] max-h-[100vh] grid-cols-1 items-start gap-8 overflow-hidden px-4 sm:mt-20 md:grid-cols-2 lg:grid-cols-3"
     >
       {isInView ? (
         <>
@@ -153,7 +153,7 @@ function ReviewGrid() {
   );
 }
 
-export function Reviews() {
+export function Reviews({ titleText }: { titleText: string }) {
   return (
     <MaxWidthWrapper className="relative max-w-5xl">
       <img
@@ -161,6 +161,9 @@ export function Reviews() {
         src="/what-people-are-buying.png"
         className="absolute select-none hidden xl:block -left-32 top-1/3"
       />
+      <h2 className="px-8 py-4 z-50 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
+        {titleText}
+      </h2>
       <ReviewGrid />
     </MaxWidthWrapper>
   );

@@ -1,12 +1,18 @@
-import { Icons } from "@/components/icons";
+import { Icons } from "@/components/Icons";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Phone from "@/components/Phone";
 import { Reviews } from "@/components/Reviews";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight, Check, Star } from "lucide-react";
 import Link from "next/link";
+import Nav from "./admin/components/SideNavbar";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { useSession } from "next-auth/react";
+import { auth } from "@/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
   return (
     <div className="bg-slate-50">
       <section>
@@ -99,6 +105,19 @@ export default function Home() {
         </MaxWidthWrapper>
       </section>
 
+      <div className="pt-16">
+        {/* <h2 className="absolute top-1/2 left1/2 transform -translate-x-1/2 -translate-y-1/2 order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
+          Featured Products
+        </h2> */}
+        <Reviews titleText="Best Selling" />
+      </div>
+
+      <div className="pt-16">
+        <h2 className="order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
+          Popular Products
+        </h2>
+      </div>
+
       {/* value proposition section */}
       <section className="bg-slate-100 py-24">
         <MaxWidthWrapper className="flex flex-col items-center gap-16 sm:gap-32">
@@ -111,7 +130,7 @@ export default function Home() {
               </span>
               say
             </h2>
-            <img src="/beei-1.png" className="w-24 order-0 lg:order-2" />
+            {/* <img src="/beei-1.png" className="w-24 order-0 lg:order-2" /> */}
           </div>
 
           <div className="mx-auto grid max-w-2xl grid-cols-1 px-4 lg:mx-0 lg:max-w-none lg:grid-cols-2 gap-y-16">
@@ -181,10 +200,6 @@ export default function Home() {
             </div>
           </div>
         </MaxWidthWrapper>
-
-        <div className="pt-16">
-          <Reviews />
-        </div>
       </section>
 
       <section>

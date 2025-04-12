@@ -1,0 +1,42 @@
+# Query: console
+# ContextLines: 1
+
+8 results - 7 files
+
+app/admin/orders.js:
+  16    async function manualConfirmation(OrderId, orderStatus) {
+  17:     console.log(OrderId);
+  18      await axios.put("/api/orders", { OrderId, orderStatus });
+
+app/admin/admins/page.js:
+  19        .then((res) => {
+  20:         console.log(res.data);
+  21          swal.fire({
+
+app/admin/components/HomeHeader.tsx:
+  6    if (!session?.user) return null;
+  8    return (
+
+app/admin/components/SideNavbar.js:
+  11  
+  12:   console.log(pathname);
+  13  
+
+app/api/upload.js:
+  22  
+  23:   console.log("length:", files.file.length);
+  24    const client = new S3Client({
+
+components/Navbar.tsx:
+  13  
+  14:   console.log(user);
+  15    return (
+
+lib/mongoose.js:
+  12      await connection.db.admin().command({ ping: 1 });
+  13:     console.log(
+  14        "Pinged your deployment. You successfully connected to MongoDB!"
+
+  20  }
+  21: mongooseConnect().catch(console.dir);
+  22  
