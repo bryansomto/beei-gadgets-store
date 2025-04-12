@@ -22,5 +22,8 @@ export async function verifyPassword(
   plainPassword: string,
   hashedPassword: string
 ): Promise<boolean> {
+  if (!plainPassword || !hashedPassword) {
+    throw new Error("Missing arguments to verifyPassword");
+  }
   return await bcrypt.compare(plainPassword, hashedPassword)
 }

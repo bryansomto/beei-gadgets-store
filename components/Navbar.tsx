@@ -32,6 +32,7 @@ const Navbar = () => {
               </Link>
             ) : isAdmin ? (
               <>
+                <p>Welcome {user.name}</p>
                 <SignOutButton />
                 <Link
                   href="/admin"
@@ -41,7 +42,10 @@ const Navbar = () => {
                 </Link>
               </>
             ) : (
-              <SignOutButton />
+              <>
+                <p>Welcome {user.name}</p>
+                <SignOutButton />
+              </>
             )}
           </div>
         </div>

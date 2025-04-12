@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { User } from '@/models/User'
-import { verifyPassword } from '@/lib/password'
+import { verifyPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'
 
 interface VerifyUserParams {
@@ -11,26 +11,26 @@ interface VerifyUserParams {
 interface VerifyUserResult {
     id: string
     email: string
-    password: string
+    name: string
 }
 
 export default async function verifyUser(
     { email, password }: VerifyUserParams
-): Promise<VerifyUserResult | false> {
+): Promise<VerifyUserResult | null> {
     await mongooseConnect()
 
-    const user = await User.findOne({ email }) as { _id: string; email: string; password: string }
+    const user = await User.findOne({ email }) as { _id: string; email: string; password: string; firstName: string } | null
 
-    if (!user) {
-        return false
+    if (!user || !user.password) {
+        return null
     }
 
     const id = user._id.toString() // ensure id is a string
     const isValidPassword = verifyPassword(password, user.password)
 
     if (!isValidPassword) {
-        return false
+        return null
     }
 
-    return { id: id, email: user.email, password: user.password }
+    return { id: id, email: user.email, name: user.firstName } // return the user object
 }

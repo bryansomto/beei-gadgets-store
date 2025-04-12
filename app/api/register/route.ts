@@ -1,7 +1,7 @@
 // pages/api/register.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { User } from '@/models/User'
-import { saltAndHashPassword } from '@/lib/password'
+import { saltAndHashPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'
 import { NextResponse, NextRequest } from 'next/server'
 

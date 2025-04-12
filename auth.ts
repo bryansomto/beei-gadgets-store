@@ -39,22 +39,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const { email, password } = await signInSchema.parseAsync(credentials);
 
           // logic to verify if the user exists
+
+          if (!email || !password) {
+            // Return `null` to indicate that the credentials are invalid
+            // throw new Error("Invalid credentials");
+            return null;
+          }
           const user = await verifyUser({ email, password });
 
           if (!user) {
-            return null;
+            // Return `null` to indicate that the credentials are invalid
+            throw new Error("Invalid credentials");
+            // return null;
           }
 
           // return object matching the User type
           return {
             id: user.id,
             email: user.email,
-            password: user.password,
+            name: user.name,
             };
         } catch (error) {
           if (error instanceof ZodError) {
             // Return `null` to indicate that the credentials are invalid
-            return null;
+            throw new Error("Invalid credentials");
+            // return null;
           }
           throw error; // Re-throw unexpected errors
         }
@@ -78,11 +87,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     // 🧠 Make token values available to the client
-    async session({ session, token }) {
+    async session({ session, token, user }) {
       if (token) {
         session.user.id = token.id as string
         session.user.email = token.email as string
-        session.user.name = token.name
+        session.user.name = token.name as string
       }
       return session
     },
