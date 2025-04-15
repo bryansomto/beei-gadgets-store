@@ -7,8 +7,8 @@ import client from "./lib/db"
 import { ZodError } from "zod"
 import { signInSchema } from "./lib/zod"
 import verifyUser from "./lib/verifyUser"
+import { isUserAdmin } from "./lib/isUserAdmin"
 
- 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(client),
   providers: [
@@ -58,6 +58,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: user.id,
             email: user.email,
             name: user.name,
+            isAdmin: user.isAdmin,
+            image: user.image,
+            initials: user.initials,
             };
         } catch (error) {
           if (error instanceof ZodError) {
@@ -78,20 +81,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     // 🔐 Add data to the JWT token
     async jwt({ token, user }) {
+      console.log("JWT callback", { user, token })
       if (user) {
         token.id = user.id
         token.email = user.email
         token.name = user.name
+        token.isAdmin = user.isAdmin
+        token.image = user.image
+        token.initials = user.initials
+      }
+      // When called during session retrieval, re-check isAdmin:
+      if (typeof token.isAdmin === "undefined" && token.email) {
+        const adminStatus = await isUserAdmin(token.email);
+        token.isAdmin = adminStatus;
       }
       return token
     },
 
     // 🧠 Make token values available to the client
     async session({ session, token, user }) {
+      console.log("SESSION callback", { token });
       if (token) {
         session.user.id = token.id as string
         session.user.email = token.email as string
         session.user.name = token.name as string
+        session.user.isAdmin = token.isAdmin as boolean
+        session.user.image = token.image as string
+        session.user.initials = token.initials as string
       }
       return session
     },

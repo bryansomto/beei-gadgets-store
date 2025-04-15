@@ -1,14 +1,10 @@
 // pages/api/register.ts
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { User } from '@/models/User'
 import { saltAndHashPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'
 import { NextResponse, NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest, res: NextResponse) {
-  // if (req.method !== 'POST') {
-  //   return res.status(405).json({ message: 'Method not allowed' })
-  // }
 
   const body = await req.json()
   const { email, password, firstName, lastName } = body

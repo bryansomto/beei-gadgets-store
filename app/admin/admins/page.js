@@ -5,8 +5,19 @@ import { prettyDate } from "@/lib/date";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { withSwal } from "react-sweetalert2";
-import Nav from "../components/SideNavbar";
+import Nav from "../components/MenuBar";
 import { MailIcon } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { buttonVariants } from "@/components/ui/button";
+import Layout from "../components/Layout";
 
 function AdminsPage({ swal }) {
   const [email, setEmail] = useState("");
@@ -67,84 +78,85 @@ function AdminsPage({ swal }) {
     loadAdmins();
   }, []);
   return (
-    <MaxWidthWrapper>
-      <div className="bg-bgGray min-h-screen ">
-        <div className="sm:hidden flex items-center justify-center p-2"></div>
-
-        <div className="flex">
-          <Nav />
-          <div className="flex-grow p-4">
-            <h2 className="tracking-tight text-balance !leading-tight font-bold  text-gray-900">
-              Add new admin
-            </h2>
-
-            <form onSubmit={addAdmin} className="w-full max-w-sm">
-              <div className="mt-2 space-y-2">
-                <div className="relative flex items-center text-slate-400 focus-within:text-slate-600">
-                  <MailIcon className="w-5 h-5 absolute ml-3 pointer-events-none" />
-                  <input
-                    type="email"
-                    className="mb-0 w-72 pr-3 pl-10 p-2 border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                    value={email}
-                    onChange={(ev) => setEmail(ev.target.value)}
-                    placeholder="email@beeigadgetsstore.com"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-[#13AD4D] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-[#13AD4D]/80 transition-colors duration-200"
-                >
-                  Add
-                </button>
+    <Layout>
+      <div className="flex flex-col flex-grow items-center">
+        <h2 className="mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
+          Add new admin
+        </h2>
+        <div className="space-y-6">
+          <form onSubmit={addAdmin} className="w-full max-w-sm">
+            <div className="mt-2 space-y-2">
+              <div className="relative flex items-center text-slate-400 focus-within:text-slate-600">
+                <MailIcon className="w-5 h-5 absolute ml-3 pointer-events-none" />
+                <input
+                  type="email"
+                  className="mb-0 w-72 pr-3 pl-10 p-2 border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                  value={email}
+                  onChange={(ev) => setEmail(ev.target.value)}
+                  placeholder="email@beeigadgetsstore.com"
+                />
               </div>
-            </form>
-            <h2 className="mt-10 mb-4 tracking-tight text-center text-balance !leading-tight font-bold  text-gray-900">
-              Admin List
-            </h2>
-            <table className="basic">
-              <thead>
-                <tr>
-                  <th className="text-left font-normal">Admin google email</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading && (
-                  <tr>
-                    <td colSpan={2}>
-                      <div className="py-4">
-                        <Spinner fullWidth={true} />
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                {adminEmails.length > 0 &&
-                  adminEmails.map((adminEmail, _id) => (
-                    <tr key={_id}>
-                      <td>{adminEmail.email}</td>
-                      <td>
-                        {adminEmail.createdAt &&
-                          prettyDate(adminEmail.createdAt)}
-                      </td>
-                      <td>
-                        <button
-                          onClick={() =>
-                            deleteAdmin(adminEmail._id, adminEmail.email)
-                          }
-                          className="btn-red"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+              <button
+                type="submit"
+                className={`${buttonVariants({
+                  size: "sm",
+                  variant: "default",
+                })} cursor-pointer w-30`}
+              >
+                Add
+              </button>
+            </div>
+          </form>
+          <Table>
+            <TableCaption>Administrators of the store.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-left font-normal">
+                  Admin google email
+                </TableHead>
+                <TableHead className="text-left font-normal">
+                  Created at
+                </TableHead>
+                <TableHead className="text-left font-normal">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell>
+                    <div className="py-4">
+                      <Spinner fullWidth={true} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {adminEmails.length > 0 &&
+                adminEmails.map((adminEmail, _id) => (
+                  <TableRow key={_id}>
+                    <TableCell>{adminEmail.email}</TableCell>
+                    <TableCell>
+                      {adminEmail.createdAt && prettyDate(adminEmail.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() =>
+                          deleteAdmin(adminEmail._id, adminEmail.email)
+                        }
+                        className={`${buttonVariants({
+                          size: "sm",
+                          variant: "destructive",
+                        })} cursor-pointer`}
+                      >
+                        Delete
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
-    </MaxWidthWrapper>
+    </Layout>
   );
 }
 

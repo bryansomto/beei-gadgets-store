@@ -2,32 +2,33 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { buttonVariants } from "./ui/button";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import useUser from "@/lib/userSession";
 
 export function SignInForm() {
-  const { data: session, status } = useSession(); // get session + status
+  const { user, isAdmin, loading, authenticated } = useUser();
   const router = useRouter(); // Next.js client-side navigation
-  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(false);
 
   // ✅ Watch for login success
-  useEffect(() => {
-    if (status === "authenticated") {
+  React.useEffect(() => {
+    if (authenticated) {
       Swal.fire({
         icon: "success",
-        title: `Welcome back, ${session?.user?.name ?? "user"}!`,
+        title: `Welcome back, ${user?.name ?? "user"}!`,
         showConfirmButton: false,
         timer: 1500,
       });
       router.refresh(); // Refresh the session
       router.push("/"); // Redirect to homepage or dashboard
     }
-  }, [status, router]);
+  }, [authenticated, router]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
+    setProgress(true);
 
     const formData = new FormData(event.currentTarget);
     const formObject: Record<string, string> = {};
@@ -40,7 +41,7 @@ export function SignInForm() {
       redirect: false,
     });
 
-    setLoading(false);
+    setProgress(false);
 
     if (res?.error) {
       Swal.fire({
@@ -83,9 +84,9 @@ export function SignInForm() {
       <button
         type="submit"
         className={`${buttonVariants({ size: "lg" })} cursor-pointer`}
-        disabled={loading}
+        disabled={progress}
       >
-        {loading ? "Logging in..." : "Login"}
+        {progress ? "Logging in..." : "Login"}
       </button>
     </form>
   );

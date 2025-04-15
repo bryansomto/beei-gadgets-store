@@ -5,7 +5,7 @@ import { Reviews } from "@/components/Reviews";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight, Check, Star } from "lucide-react";
 import Link from "next/link";
-import Nav from "./admin/components/SideNavbar";
+import Nav from "./admin/components/MenuBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useSession } from "next-auth/react";

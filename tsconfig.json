@@ -21,11 +21,17 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "crypto": [
-      "node_modules/crypto-js"
-    ],
+      "@/lib/*": ["lib/*"],
+      "@/app/*": ["app/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "lib/CartContext.js", "app/admin/page.jsx", "hgj"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/next-auth.d.ts",  // Ensure this file is included
+    "next-auth.d.ts"  // Add this as well
+  ],
   "exclude": ["node_modules"]
 }

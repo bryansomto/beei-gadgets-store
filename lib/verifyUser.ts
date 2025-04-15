@@ -1,6 +1,9 @@
+import type { InferSchemaType } from 'mongoose';
 import { User } from '@/models/User'
 import { verifyPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'
+import { isUserAdmin } from './isUserAdmin'
+import { getInitials } from './getInitials';
 
 interface VerifyUserParams {
     email: string
@@ -11,6 +14,9 @@ interface VerifyUserResult {
     id: string
     email: string
     name: string
+    isAdmin: boolean
+    image: string
+    initials: string
 }
 
 export default async function verifyUser(
@@ -18,18 +24,24 @@ export default async function verifyUser(
 ): Promise<VerifyUserResult | null> {
     await mongooseConnect()
 
-    const user = await User.findOne({ email }) as { _id: string; email: string; password: string; firstName: string } | null
+    type UserType = InferSchemaType<typeof User.schema> & { _id: string, isAdmin: boolean, image: string, initials: string };
+    const user: UserType | null = await User.findOne({ email });
 
     if (!user || !user.password) {
         return null
     }
 
     const id = user._id.toString() // ensure id is a string
-    const isValidPassword = verifyPassword(password, user.password)
+
+    const initials = await getInitials(user.firstName || "", user.lastName || "")
+    console.log(initials)
+
+    const isValidPassword = await verifyPassword(password, user.password)
 
     if (!isValidPassword) {
         return null
     }
+    const isAdmin = await isUserAdmin(user.email)
 
-    return { id: id, email: user.email, name: user.firstName } // return the user object
+    return { id, email: user.email, name: user.firstName || "", isAdmin, image: user.image || "", initials } // return the user object
 }

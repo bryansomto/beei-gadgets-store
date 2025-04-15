@@ -1,35 +1,25 @@
-import { auth } from "@/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
 
-export default async function HomeHeader() {
-  const session = await auth();
-  if (!session?.user) return null;
+interface Session {
+  user?: {
+    name?: string;
+    image?: string;
+  };
+}
+
+export default async function HomeHeader({ session }: { session: Session }) {
   return (
-    <div className="text-blue-900 flex justify-between">
-      <h2 className="mt-0">
-        <div className="flex gap-2 items-center">
-          <Image
-            src={session?.user?.image || ""}
-            alt={`An image of ${session.user.name}`}
-            width={24}
-            height={24}
-            className="rounded-md sm:hidden"
-          />
-          <div>
-            Hello, <b>{session.user.name}</b>
-          </div>
-        </div>
-      </h2>
+    <div className="flex justify-between">
       <div>
-        <div className="hidden sm:flex bg-gray-300 gap-1 text-black rounded-lg overflow-hidden">
-          <Image
-            src={session.user.image || ""}
-            alt={`An image of ${session.user.name}`}
-            width={24}
-            height={24}
+        {/* <div className="hidden sm:flex gap-2 ring-offset-2 ring ring-primary/60 rounded-lg overflow-hidden"> */}
+        <Avatar className="hidden sm:flex ring-2 ring-primary/70 ring-offset-2">
+          <AvatarImage
+            src={session?.user?.image || ""}
+            alt={`@${session?.user?.name}`}
           />
-          <span className="px-2 hidden sm:block">{session.user.name}</span>
-        </div>
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
       </div>
     </div>
   );
