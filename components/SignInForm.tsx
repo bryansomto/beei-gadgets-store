@@ -1,14 +1,14 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
-import { buttonVariants } from "./ui/button";
-import React, { useEffect, useState } from "react";
+import { signIn } from "next-auth/react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import useUser from "@/lib/userSession";
+import { buttonVariants } from "./ui/button";
 
 export function SignInForm() {
-  const { user, isAdmin, loading, authenticated } = useUser();
+  const { user, authenticated } = useUser();
   const router = useRouter(); // Next.js client-side navigation
   const [progress, setProgress] = useState(false);
 

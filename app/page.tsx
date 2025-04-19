@@ -1,3 +1,5 @@
+"use client";
+
 import { Icons } from "@/components/Icons";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Phone from "@/components/Phone";
@@ -5,14 +7,28 @@ import { Reviews } from "@/components/Reviews";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight, Check, Star } from "lucide-react";
 import Link from "next/link";
-import Nav from "./admin/components/MenuBar";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { useSession } from "next-auth/react";
 import { auth } from "@/auth";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import ProductGrid from "@/components/ProductGrid";
 
-export default async function Home() {
-  const session = await auth();
+export default function Home() {
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch products on component mount (or use getServerSideProps for server-side)
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("/api/products");
+        setProducts(response.data); // assuming response is an array of products
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
     <div className="bg-slate-50">
       <section>
@@ -117,6 +133,13 @@ export default async function Home() {
           Popular Products
         </h2>
       </div>
+
+      {/* Displaying the ProductGrid with the fetched products */}
+      <section>
+        <MaxWidthWrapper className="py-16">
+          <ProductGrid products={products} />
+        </MaxWidthWrapper>
+      </section>
 
       {/* value proposition section */}
       <section className="bg-slate-100 py-24">

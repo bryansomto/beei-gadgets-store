@@ -5,7 +5,6 @@ import { SignInButtonWithGoogle } from "@/components/SessionButtons";
 import { SignUpForm } from "@/components/SignUpForm";
 import Link from "next/link";
 import React from "react";
-import SweetAlert2 from "react-sweetalert2";
 
 const Register = () => {
   return (

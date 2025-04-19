@@ -1,49 +1,62 @@
 "use client";
+
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Spinner from "./Spinner";
 import { subHours } from "date-fns";
+import { HashLoader } from "react-spinners";
+
+interface LineItem {
+  quantity: number;
+  price_data: {
+    unit_amount: number;
+  };
+}
+
+interface Order {
+  createdAt: string;
+  line_items: LineItem[];
+}
 
 export default function HomeStats() {
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
     setIsLoading(true);
-    axios.get("/api/orders").then((res) => {
+    axios.get<Order[]>("/api/orders").then((res) => {
       setOrders(res.data);
       setIsLoading(false);
     });
   }, []);
 
-  function ordersTotal(orders) {
-    let sum = 0;
-    orders.forEach((order) => {
-      const { line_items } = order;
-      line_items.forEach((li) => {
-        const lineSum = li.quantity * li.price_data.unit_amount;
-        sum += lineSum;
-      });
-    });
+  function ordersTotal(orders: Order[]): string {
+    const sum = orders.reduce((total, order) => {
+      const orderTotal = order.line_items.reduce((subTotal, item) => {
+        return subTotal + item.quantity * item.price_data.unit_amount;
+      }, 0);
+      return total + orderTotal;
+    }, 0);
 
-    return new Intl.NumberFormat("en-GB").format(sum);
+    return new Intl.NumberFormat("en-NG").format(sum);
   }
 
   if (isLoading) {
     return (
       <div className="my-4">
-        <Spinner fullWidth={true} />
+        <HashLoader color="#00A63E" size={28} />
       </div>
     );
   }
 
+  const now = new Date();
   const ordersToday = orders.filter(
-    (o) => new Date(o.createdAt) > subHours(new Date(), 24)
+    (o) => new Date(o.createdAt) > subHours(now, 24)
   );
   const ordersWeek = orders.filter(
-    (o) => new Date(o.createdAt) > subHours(new Date(), 24 * 7)
+    (o) => new Date(o.createdAt) > subHours(now, 24 * 7)
   );
   const ordersMonth = orders.filter(
-    (o) => new Date(o.createdAt) > subHours(new Date(), 24 * 30)
+    (o) => new Date(o.createdAt) > subHours(now, 24 * 30)
   );
 
   return (
@@ -68,6 +81,7 @@ export default function HomeStats() {
           </div>
         </div>
       </div>
+
       <h2>Revenue</h2>
       <div className="tiles-grid">
         <div className="tile">

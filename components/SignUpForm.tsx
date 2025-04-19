@@ -1,16 +1,14 @@
 "use client";
 import { useState } from "react";
-import { buttonVariants } from "./ui/button";
 import axios from "axios";
-import { withSwal } from "react-sweetalert2";
-
-import SweetAlert2 from "react-sweetalert2";
+import { buttonVariants } from "./ui/button";
 
 export function SignUpForm() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [progress, setProgress] = useState(false);
 
   const [swalProps, setSwalProps] = useState({});
   interface AddUserEvent extends React.FormEvent<HTMLFormElement> {}
@@ -109,7 +107,7 @@ export function SignUpForm() {
         type="submit"
         className={`${buttonVariants({ size: "lg" })} cursor-pointer`}
       >
-        Sign Up
+        {progress ? "Registering..." : "Register"}
       </button>
     </form>
   );

@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 export default function MenuBar() {
   const inactiveLink = "";
   const activeLink = `${inactiveLink} bg-highlight text-primary font-semibold rounded-sm`;
-  const inactiveIcon = "w-6 h-6";
+  const inactiveIcon = "w-6 h-6 hover:text-zinc-800 transition-all";
   const activeIcon = inactiveIcon + " text-primary";
   const pathname = usePathname();
 

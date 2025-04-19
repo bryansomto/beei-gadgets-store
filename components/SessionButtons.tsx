@@ -1,8 +1,8 @@
 "use client";
 
 import { signIn, signOut } from "next-auth/react";
-import { buttonVariants } from "./ui/button";
 import { FaGoogle } from "react-icons/fa";
+import { buttonVariants } from "./ui/button";
 
 export const SignInButton = () => {
   return (

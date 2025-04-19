@@ -5,9 +5,9 @@ import Nodemailer from "next-auth/providers/nodemailer"
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
 import client from "./lib/db"
 import { ZodError } from "zod"
-import { signInSchema } from "./lib/zod"
 import verifyUser from "./lib/verifyUser"
 import { isUserAdmin } from "./lib/isUserAdmin"
+import { signInSchema } from "./lib/validation/signInSchema"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(client),
@@ -36,6 +36,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
+          console.log("signInSchema", typeof signInSchema, signInSchema);
+
           const { email, password } = await signInSchema.parseAsync(credentials);
 
           // logic to verify if the user exists
@@ -81,7 +83,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     // 🔐 Add data to the JWT token
     async jwt({ token, user }) {
-      console.log("JWT callback", { user, token })
+      // console.log("JWT callback", { user, token })
       if (user) {
         token.id = user.id
         token.email = user.email
@@ -100,7 +102,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     // 🧠 Make token values available to the client
     async session({ session, token, user }) {
-      console.log("SESSION callback", { token });
+      // console.log("SESSION callback", { token });
       if (token) {
         session.user.id = token.id as string
         session.user.email = token.email as string

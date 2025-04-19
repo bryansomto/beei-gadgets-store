@@ -68,7 +68,11 @@ const Navbar = () => {
                     <X size={24} className="mt-[8px] ml-[8px]" />
                   ) : (
                     <>
-                      <AvatarImage src={image || ""} alt={`@${user?.name}`} />
+                      <AvatarImage
+                        src={image || ""}
+                        alt={`@${user?.name}`}
+                        loading="lazy"
+                      />
                       <AvatarFallback>
                         <b>{initials || "U"}</b>
                       </AvatarFallback>
