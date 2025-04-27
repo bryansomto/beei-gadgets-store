@@ -1,10 +1,9 @@
 "use client";
 
-import { prettyDate } from "@/lib/date";
-import axios from "axios";
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { withSwal } from "react-sweetalert2";
-import { MailIcon } from "lucide-react";
+import { MailIcon, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,9 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import Layout from "../components/Layout";
-import { HashLoader } from "react-spinners";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -29,27 +27,31 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useToast } from "@/components/ui/use-toast";
+import { prettyDate } from "@/lib/date";
 import colors from "@/lib/colors/swalAlerts";
 
-function AdminsPage({ swal }: { swal: any }) {
-  const [email, setEmail] = useState("");
+interface Admin {
+  _id: string;
+  email: string;
+  createdAt?: string;
+}
+
+interface AdminsPageProps {
+  swal: {
+    fire: (options: any) => Promise<{ isConfirmed: boolean }>;
+  };
+}
+
+const formSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export function AdminsPage({ swal }: AdminsPageProps) {
   const [adminEmails, setAdminEmails] = useState<Admin[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  interface Admin {
-    _id: string;
-    email: string;
-    createdAt?: string;
-  }
-
-  interface AddAdminResponse {
-    message: string;
-  }
-
-  const formSchema = z.object({
-    email: z.string().min(1, {
-      message: "Email must be a valid one",
-    }),
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,152 +60,178 @@ function AdminsPage({ swal }: { swal: any }) {
     },
   });
 
-  function addAdmin(data: z.infer<typeof formSchema>) {
-    axios
-      .post<AddAdminResponse>("/api/admins", { email: data.email })
-      .then((res) => {
-        swal.fire({
-          title: "Admin created!",
-          icon: "success",
-          confirmButtonColor: colors.green,
-        });
-        form.reset(); // reset form after success
-        loadAdmins();
-      })
-      .catch((err: any) => {
-        swal.fire({
-          title: "Error!",
-          text: err?.response?.data?.message || "An unexpected error occurred",
-          icon: "error",
-        });
+  const loadAdmins = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await axios.get<Admin[]>("/api/admins");
+      setAdminEmails(data);
+    } catch (error) {
+      console.error("Failed to load admins", error);
+      toast({
+        title: "Error",
+        description: "Failed to load admin list",
+        variant: "destructive",
       });
-  }
-  interface DeleteAdminResult {
-    isConfirmed: boolean;
-  }
-
-  function deleteAdmin(_id: string, email: string) {
-    swal
-      .fire({
-        title: "Are you sure?",
-        text: `Do you want to delete admin ${email}?`,
-        showCancelButton: true,
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Yes, Delete!",
-        confirmButtonColor: colors.red,
-        reverseButtons: true,
-      })
-      .then(async (result: DeleteAdminResult) => {
-        if (result.isConfirmed) {
-          axios.delete("/api/admins?_id=" + _id).then(() => {
-            swal.fire({
-              title: "Admin deleted!",
-              icon: "success",
-              confirmButtonColor: colors.green,
-            });
-            loadAdmins();
-          });
-        }
-      });
-  }
-  function loadAdmins() {
-    setIsLoading(true);
-    axios.get("/api/admins").then((res) => {
-      setAdminEmails(res.data);
+    } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addAdmin = async (formData: z.infer<typeof formSchema>) => {
+    try {
+      setIsSubmitting(true);
+      await axios.post("/api/admins", { email: formData.email });
+
+      swal.fire({
+        title: "Success!",
+        text: "Admin added successfully",
+        icon: "success",
+        confirmButtonColor: colors.green,
+      });
+
+      form.reset();
+      await loadAdmins();
+    } catch (error: any) {
+      console.error("Failed to add admin", error);
+      swal.fire({
+        title: "Error!",
+        text: error.response?.data?.message || "Failed to add admin",
+        icon: "error",
+        confirmButtonColor: colors.red,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteAdmin = async (_id: string, email: string) => {
+    const result = await swal.fire({
+      title: "Are you sure?",
+      text: `Remove admin access for ${email}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: colors.red,
+      confirmButtonText: "Yes, remove",
+      cancelButtonText: "Cancel",
     });
-  }
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`/api/admins?_id=${_id}`);
+
+        toast({
+          title: "Success",
+          description: "Admin removed successfully",
+        });
+
+        await loadAdmins();
+      } catch (error) {
+        console.error("Failed to delete admin", error);
+        toast({
+          title: "Error",
+          description: "Failed to remove admin",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     loadAdmins();
   }, []);
+
   return (
     <Layout requiresAuth>
-      <h2 className="tracking-tight text-left text-balance !leading-tight font-bold text-3xl md:text-4xl text-gray-900">
-        Add new admin
-      </h2>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(addAdmin)}
-          className="w-full max-w-sm space-y-2"
-        >
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Admin e-mail</FormLabel>
-                <FormControl>
-                  <div className="relative flex items-center text-slate-400 focus-within:text-slate-600">
-                    <MailIcon className="w-5 h-5 absolute ml-3 pointer-events-none" />
-                    <Input
-                      type="email"
-                      className="pl-10"
-                      placeholder="email@beeigadgetsstore.com"
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <button
-            type="submit"
-            className={`${buttonVariants({
-              variant: "default",
-            })} cursor-pointer w-full`}
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">
+            Admin Management
+          </h2>
+          <p className="text-muted-foreground">
+            Add or remove administrators for the store
+          </p>
+        </div>
+
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(addAdmin)}
+            className="space-y-4 max-w-md"
           >
-            Add
-          </button>
-        </form>
-      </Form>
-      <div className="flex justify-center w-full">
-        <div className="w-full max-w-xl">
-          <Table className="mx-auto">
-            <TableCaption className="text-center">
-              Administrators of the store.
-            </TableCaption>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Admin Email</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <MailIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="admin@example.com"
+                        className="pl-8"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add Admin"
+              )}
+            </Button>
+          </form>
+        </Form>
+
+        <div className="rounded-md border">
+          <Table>
+            <TableCaption>Current administrators</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-normal">
-                  Admin google email
-                </TableHead>
-                <TableHead className="font-normal">Created at</TableHead>
-                <TableHead className="font-normal">Action</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Added On</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={3}>
-                    <div className="flex justify-center py-4">
-                      <HashLoader color="#00A63E" size={28} />
-                    </div>
+                  <TableCell colSpan={3} className="h-24 text-center">
+                    <Loader2 className="mx-auto h-6 w-6 animate-spin" />
                   </TableCell>
                 </TableRow>
-              )}
-              {adminEmails.length > 0 &&
-                adminEmails.map((adminEmail, _id) => (
-                  <TableRow key={_id}>
-                    <TableCell>{adminEmail.email}</TableCell>
+              ) : adminEmails.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center">
+                    No administrators found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                adminEmails.map((admin) => (
+                  <TableRow key={admin._id}>
+                    <TableCell className="font-medium">{admin.email}</TableCell>
                     <TableCell>
-                      {adminEmail.createdAt && prettyDate(adminEmail.createdAt)}
+                      {admin.createdAt ? prettyDate(admin.createdAt) : "-"}
                     </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() =>
-                          deleteAdmin(adminEmail._id, adminEmail.email)
-                        }
-                        className={`${buttonVariants({
-                          size: "sm",
-                          variant: "destructive",
-                        })} cursor-pointer`}
+                    <TableCell className="text-right">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteAdmin(admin._id, admin.email)}
                       >
-                        Delete
-                      </button>
+                        Remove
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -212,6 +240,4 @@ function AdminsPage({ swal }: { swal: any }) {
   );
 }
 
-export default withSwal(({ swal }: { swal: any }) => (
-  <AdminsPage swal={swal} />
-));
+export default withSwal(AdminsPage);
