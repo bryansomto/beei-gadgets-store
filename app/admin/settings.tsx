@@ -77,7 +77,7 @@ function SettingsPage({ swal }: SettingsPageProps) {
   }
 
   return (
-    <Layout>
+    <Layout requiresAuth>
       <h1>Settings</h1>
       {isLoading ? (
         <HashLoader color="#00A63E" size={28} />

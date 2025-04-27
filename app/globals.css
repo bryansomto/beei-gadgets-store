@@ -3,26 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* @theme {
-  --animate-marquee: marquee var(--marquee-duration) linear infinite;
-  --animate-fade-in: fade-in 0.5s linear forwards;
-
-  @keyframes marquee {
-      100% {
-          transform: translateY(-50%);
-        }
-  }
-
-  @keyframes fade-in {
-    from {
-        opacity: 0;
-      }
-    to {
-        opacity: 1;
-      }
-  }
-} */
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -148,6 +128,51 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.527 0.154 150.069);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: hsl(var(--primary));
+  background: hsl(var(--background));
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--primary) !important;
+}
+
+/* Autoplay progress circle */
+.swiper-autoplay-progress {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: hsl(var(--primary));
+}
+
+.swiper-autoplay-progress svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 4px;
+  stroke: hsl(var(--primary));
+  fill: none;
+  stroke-dashoffset: 0px;
+  stroke-linecap: round;
+}
+
+.swiper-autoplay-progress circle {
+  stroke-dasharray: 125.6;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
 }
 
 

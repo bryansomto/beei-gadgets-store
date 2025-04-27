@@ -51,7 +51,7 @@ export default function OrdersPage() {
   }, [goToOrders, router]);
 
   return (
-    <Layout>
+    <Layout requiresAuth>
       <h1>Orders</h1>
       <table className="basic">
         <thead>

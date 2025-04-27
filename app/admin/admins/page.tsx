@@ -117,7 +117,7 @@ function AdminsPage({ swal }: { swal: any }) {
     loadAdmins();
   }, []);
   return (
-    <Layout>
+    <Layout requiresAuth>
       <h2 className="tracking-tight text-left text-balance !leading-tight font-bold text-3xl md:text-4xl text-gray-900">
         Add new admin
       </h2>
