@@ -1,6 +1,6 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { categorySchema } from "@/lib/validation/categorySchema";
-import { Category } from "@/models/Category";
+import Category from "@/models/Category";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {

@@ -1,14 +1,30 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-const path = require("path");
 
 module.exports = {
+  preset: "ts-jest",
   testEnvironment: "node",
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", {}],
+    "^.+\\.(t|j)sx?$": [
+      "@swc/jest",
+      {
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            tsx: true,
+            decorators: true,
+          },
+          keepClassNames: true,
+          transform: {
+            react: {
+              runtime: "automatic",
+            },
+          },
+        },
+      },
+    ],
   },
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1", // Default: maps @/ to root (works for /app, /lib, etc.)
-    "^@/lib/(.*)$": "<rootDir>/lib/$1", // Maps @/lib to /lib
-    "^@/app/(.*)$": "<rootDir>/app/$1", // Maps @/app to /app
+    "^@/(.*)$": "<rootDir>/$1",
   },
+  transformIgnorePatterns: ["/node_modules/(?!mongoose|mongodb-memory-server)"],
 };
