@@ -10,6 +10,8 @@ import { FaCartPlus, FaHeart } from "react-icons/fa";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { Badge } from "./ui/badge";
+import { useCart } from "@/context/CartContext";
 
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -17,7 +19,6 @@ import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { Badge } from "./ui/badge";
 
 interface Product {
   _id: string;
@@ -50,9 +51,11 @@ export default function ProductGrid({
   category,
   products: initialProducts = [],
 }: ProductGridProps) {
+  const { addToCart, isLoading } = useCart();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(!initialProducts.length);
   const [error, setError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -249,7 +252,11 @@ export default function ProductGrid({
                           <Button
                             size="lg"
                             className="gap-2"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              addToCart(product);
+                            }}
+                            disabled={isLoading || isAdding}
                           >
                             <FaCartPlus className="h-4 w-4" />
                             Add to Cart
@@ -350,7 +357,11 @@ export default function ProductGrid({
                       <Button
                         size="sm"
                         className="w-full gap-2"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          addToCart(product);
+                        }}
+                        disabled={isLoading || isAdding}
                       >
                         <FaCartPlus className="h-3.5 w-3.5" />
                         Add to Cart

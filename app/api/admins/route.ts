@@ -4,17 +4,40 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 // GET /api/admins - Fetch all admins
-export async function GET() {
-    try {
-      await mongooseConnect();
-      const admins = await Admin.find();
-      return NextResponse.json(admins);
-    } catch (error) {
-      console.error("❌ Error fetching admins:", error);
-      return NextResponse.json({ error: "Failed to fetch admins" }, { status: 500 });
-    }
-  }
+export async function GET(request: Request) {
+  try {
+    await mongooseConnect();
 
+    // Extract email from URL if provided
+    const url = new URL(request.url);
+    const email = url.searchParams.get('email');
+
+    if (email) {
+      // Fetch single admin by email
+      const admin = await Admin.findOne({ email });
+      
+      if (!admin) {
+        return NextResponse.json(
+          { error: 'Admin not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(admin);
+    }
+
+    // No email provided - fetch all admins
+    const admins = await Admin.find();
+    return NextResponse.json(admins);
+
+  } catch (error) {
+    console.error('❌ Error fetching admins:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch admins' },
+      { status: 500 }
+    );
+  }
+}
 
 // POST /api/admins - Add a new admin
 export async function POST(req: NextRequest) {

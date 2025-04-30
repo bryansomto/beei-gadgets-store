@@ -6,12 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { Product } from "@/types";
+import { useCart } from "@/context/CartContext";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addToCart, isLoading } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToCart = async () => {
+    setIsAdding(true);
+    try {
+      await addToCart(product);
+      // Show success feedback
+    } catch (error) {
+      // Show error feedback
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div className="group relative overflow-hidden rounded-lg border shadow-sm transition-all hover:shadow-md">
       <Link href={`/products/${product._id}`} className="block">
@@ -56,8 +73,12 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       <div className="p-4 pt-0">
-        <Button className="w-full" disabled={product.stock <= 0}>
-          Add to Cart
+        <Button
+          className="w-full"
+          disabled={product.stock <= 0 || isLoading || isAdding}
+          onClick={handleAddToCart}
+        >
+          {isAdding ? "Adding..." : "Add to Cart"}
         </Button>
       </div>
     </div>
