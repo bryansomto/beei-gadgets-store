@@ -1,6 +1,6 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import Category from "@/models/Category";
-import  Product from "@/models/Product";
+import Product from "@/models/Product";
 import { NextRequest, NextResponse } from "next/server";
 
 // Cache configuration
@@ -92,8 +92,6 @@ export async function GET(req: NextRequest) {
       productsQuery,
       Product.countDocuments(filter)
     ]);
-
-    console.log({products})
 
     // ✅ Always return products as an array
     return NextResponse.json({

@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
     
     // Parse the incoming JSON body
     const body = await req.json();
-    console.log("Incoming body:", body); // Log incoming body
 
     const parseResult = categorySchema.safeParse(body);
 
@@ -55,7 +54,6 @@ export async function PUT(req: NextRequest) {
   try {
     await mongooseConnect();
     const body = await req.json();
-    console.log("Incoming body for PUT:", body); // Log incoming body
 
     const parseResult = categorySchema.safeParse(body);
 

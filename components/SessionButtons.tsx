@@ -8,11 +8,19 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext";
+import { clear } from "console";
+import { clearGuestCart, getGuestCart } from "@/lib/cartStorage";
 
 interface AuthButtonProps extends Omit<ComponentProps<"button">, "onClick"> {
   onAuthStart?: () => void;
   onAuthEnd?: () => void;
   callbackUrl?: string;
+  clearCart?: () => void;
+  cartItems?: {
+    productId: string;
+    quantity: number;
+  }[];
 }
 
 const getButtonProps = (
@@ -50,6 +58,15 @@ export const SignInButton = ({
     onAuthStart?.();
     setIsLoading(true);
     try {
+      const guestCart = getGuestCart();
+      if (guestCart.length) {
+        await fetch("/api/cart/merge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guestItems: guestCart }),
+        });
+        clearGuestCart();
+      }
       await signIn(undefined, { callbackUrl: callbackUrl || "/" });
     } catch (error) {
       toast({
@@ -62,7 +79,6 @@ export const SignInButton = ({
       onAuthEnd?.();
     }
   };
-
   return (
     <button {...buttonProps} onClick={handleClick}>
       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
@@ -90,6 +106,15 @@ export const SignInButtonWithGoogle = ({
     onAuthStart?.();
     setIsLoading(true);
     try {
+      const guestCart = getGuestCart();
+      if (guestCart.length) {
+        await fetch("/api/cart/merge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guestItems: guestCart }),
+        });
+        clearGuestCart();
+      }
       await signIn("google", { callbackUrl: callbackUrl || "/" });
     } catch (error) {
       toast({
@@ -119,6 +144,8 @@ export const SignOutButton = ({
   onAuthStart,
   onAuthEnd,
   className,
+  clearCart,
+  cartItems,
   ...props
 }: AuthButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +158,16 @@ export const SignOutButton = ({
     onAuthStart?.();
     setIsLoading(true);
     try {
-      await signOut({ redirect: false });
+      const currentCart = cartItems; // or use a passed prop like `cartItems`
+      localStorage.setItem("cart", JSON.stringify(currentCart)); // ✅ save to localStorage
+
+      // Save current cart to DB
+      await fetch("/api/cart/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItems }), // array of productId + quantity
+      });
+      await signOut({ redirect: true, callbackUrl: "/login" });
       toast({
         title: "Signed out successfully",
         description: "You have been signed out",

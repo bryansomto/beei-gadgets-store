@@ -1,20 +1,27 @@
 const { Schema, model, models } = require("mongoose");
 
-const OrderSchema = new Schema(
-  {
-    userEmail: String,
-    line_items: Object,
+const OrderSchema = new Schema({
+  userEmail: { type: String, required: true },
+  items: [
+    {
+      productId: String,
+      name: String,
+      price: Number,
+      image: String,
+      quantity: Number,
+    },
+  ],
+  total: Number,
+  address: {
     name: String,
     email: String,
     city: String,
     postalCode: String,
     streetAddress: String,
     country: String,
-    paid: Boolean,
   },
-  {
-    timestamps: true,
-  }
-);
+  status: { type: String, default: "pending" },
+  createdAt: { type: Date, default: Date.now },
+});
 
 export const Order = models?.Order || model("Order", OrderSchema);

@@ -59,8 +59,6 @@ export default function ProductGrid({
 
   useEffect(() => {
     const fetchProducts = async () => {
-      if (initialProducts.length) return;
-
       try {
         setLoading(true);
         const { data } = await axios.get<{
@@ -71,9 +69,7 @@ export default function ProductGrid({
           params: { limit, category },
         });
 
-        if (Array.isArray(data)) {
-          setProducts(data);
-        } else if (data?.success && Array.isArray(data.products)) {
+        if (data?.success && Array.isArray(data.products)) {
           setProducts(data.products);
         } else {
           setError("Invalid product data structure received.");
@@ -88,8 +84,14 @@ export default function ProductGrid({
       }
     };
 
-    fetchProducts();
-  }, [limit, category, initialProducts]);
+    // Only fetch if products are not passed as prop
+    if (!initialProducts || initialProducts.length === 0) {
+      fetchProducts();
+    } else {
+      setProducts(initialProducts);
+      setLoading(false);
+    }
+  }, [limit, category]);
 
   if (error) {
     return (

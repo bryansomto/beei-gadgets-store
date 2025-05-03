@@ -3,6 +3,9 @@ import { User as NextAuthUser } from "next-auth";
 
 declare module "next-auth" {
   interface User {
+    id: string;
+    firstName: string;
+    lastName: string;
     isAdmin?: boolean;
     image?: string;
     initials?: string;
@@ -12,7 +15,8 @@ declare module "next-auth" {
     user: {
       id: string;
       email: string;
-      name: string;
+      firstName: string;
+      lastName: string;
       isAdmin?: boolean;
       image?: string;
       initials?: string;
@@ -22,7 +26,8 @@ declare module "next-auth" {
   interface JWT {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     isAdmin?: boolean;
     image?: string;
     initials?: string;

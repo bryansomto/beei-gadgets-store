@@ -13,7 +13,7 @@ import { useCart } from "@/context/CartContext";
 
 const Navbar = () => {
   const { user, isAdmin, image, initials, loading } = useUser();
-  const { cartCount } = useCart();
+  const { cartCount, clearCart, cartItems } = useCart();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -95,8 +95,8 @@ const Navbar = () => {
                 ) : (
                   <>
                     <AvatarImage
-                      src={image || ""}
-                      alt={`@${user?.name}`}
+                      src={image}
+                      alt={`@${user?.firstName}`}
                       loading="lazy"
                     />
                     <AvatarFallback className="bg-gray-100">
@@ -180,7 +180,7 @@ const Navbar = () => {
                 <X size={20} className="m-auto" />
               ) : (
                 <>
-                  <AvatarImage src={image || ""} alt={`@${user?.name}`} />
+                  <AvatarImage src={image} alt={`@${user?.firstName}`} />
                   <AvatarFallback className="bg-gray-100">
                     <span className="text-sm font-medium">
                       {initials || "U"}
@@ -243,7 +243,7 @@ const Navbar = () => {
                   </Link>
                 )}
                 <div onClick={toggleMenu} className="w-full">
-                  <SignOutButton className="w-full" />
+                  <SignOutButton cartItems={cartItems} className="w-full" />
                 </div>
               </div>
             )}

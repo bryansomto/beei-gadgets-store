@@ -32,7 +32,6 @@ export async function mongooseConnect() {
 
   try {
     cached.conn = await cached.promise;
-    console.log('✅ MongoDB connected');
   } catch (err) {
     cached.promise = null;
     console.error('❌ MongoDB connection failed', err);

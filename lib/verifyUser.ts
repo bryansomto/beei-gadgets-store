@@ -13,7 +13,8 @@ interface VerifyUserParams {
 interface VerifyUserResult {
     id: string
     email: string
-    name: string
+    firstName: string
+    lastName: string
     isAdmin: boolean
     image: string
     initials: string
@@ -34,7 +35,6 @@ export default async function verifyUser(
     const id = user._id.toString() // ensure id is a string
 
     const initials = await getInitials(user.firstName || "", user.lastName || "")
-    console.log(initials)
 
     const isValidPassword = await verifyPassword(password, user.password)
 
@@ -43,5 +43,5 @@ export default async function verifyUser(
     }
     const isAdmin = await isUserAdmin(user.email)
 
-    return { id, email: user.email, name: user.firstName || "", isAdmin, image: user.image || "", initials } // return the user object
+    return { id, email: user.email, firstName: user.firstName || "", lastName: user.lastName || "", isAdmin, image: user.image || "", initials } // return the user object
 }

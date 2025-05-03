@@ -49,9 +49,6 @@ export async function getProducts({
     sort,
   });
 
-  // Add debugging logs
-  console.log('Attempting to fetch from:', `${baseUrl}${apiPath}`);
-
   if (query) params.append("search", query);
   if (categoryId) params.append("categoryId", categoryId);
   if (minPrice !== undefined) params.append("minPrice", minPrice.toString());
@@ -63,8 +60,6 @@ export async function getProducts({
       next: { revalidate: 300, tags: ['products'] }
     });
 
-    console.log('Response status:', response.status);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('API Error Details:', errorData);
@@ -72,7 +67,6 @@ export async function getProducts({
     }
 
     const data = await response.json();
-    console.log('API Response:', data);
 
     if (!data.products || !Array.isArray(data.products)) {
       throw new Error("Invalid products data structure");

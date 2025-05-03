@@ -105,7 +105,7 @@ export function Cart() {
               <span>{formatPrice(cartTotal)}</span>
             </div>
             <Button className="w-full mt-4" asChild>
-              <Link href="/checkout">Proceed to Checkout</Link>
+              <Link href="/cart/checkout">Proceed to Checkout</Link>
             </Button>
           </div>
         </div>

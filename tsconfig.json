@@ -32,6 +32,6 @@
     ".next/types/**/*.ts",
     "app/next-auth.d.ts",  // Ensure this file is included
     "next-auth.d.ts"  // Add this as well
-  ],
+, "models/Product.js"  ],
   "exclude": ["node_modules"]
 }

@@ -7,11 +7,22 @@ import { buttonVariants } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Define form validation schema
+const signInSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+type SignInFormValues = z.infer<typeof signInSchema>;
 
 interface SignInFormProps {
   onAuthStart?: () => void;
-  onAuthEnd?: (success?: boolean) => void; // Modified to accept success status
-  onError?: () => void; // Added new prop
+  onAuthEnd?: (success?: boolean) => void;
+  onError?: () => void;
   callbackUrl?: string;
   className?: string;
 }
@@ -27,21 +38,26 @@ export function SignInForm({
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+  });
 
   const finalCallbackUrl =
     callbackUrl || searchParams.get("callbackUrl") || "/";
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onSubmit = async (data: SignInFormValues) => {
     onAuthStart?.();
     setIsLoading(true);
 
     try {
       const result = await signIn("credentials", {
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         redirect: false,
         callbackUrl: finalCallbackUrl,
       });
@@ -49,13 +65,18 @@ export function SignInForm({
       if (result?.error) {
         onError?.();
         onAuthEnd?.(false);
+
+        let errorMessage = "An error occurred during login";
+        if (result.error === "CredentialsSignin") {
+          errorMessage = "Invalid email or password";
+        } else if (result.error === "AccessDenied") {
+          errorMessage = "Your account is not authorized";
+        }
+
         toast({
           variant: "destructive",
           title: "Login failed",
-          description:
-            result.error === "CredentialsSignin"
-              ? "Invalid email or password"
-              : "An error occurred during login",
+          description: errorMessage,
         });
       } else {
         toast({
@@ -63,11 +84,12 @@ export function SignInForm({
           description: "Redirecting to your account...",
         });
         router.push(finalCallbackUrl);
-        router.refresh(); // Ensure client state is updated
+        router.refresh();
       }
     } catch (error) {
       onError?.();
       onAuthEnd?.(false);
+      console.error("SignIn error:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -81,7 +103,7 @@ export function SignInForm({
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className={cn("space-y-4 w-full", className)}
       noValidate
     >
@@ -94,17 +116,24 @@ export function SignInForm({
         </label>
         <input
           id="email"
-          name="email"
           type="email"
           autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
-          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-2 disabled:opacity-50"
+          className={cn(
+            "block w-full rounded-md border border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-2 disabled:opacity-50",
+            errors.email &&
+              "border-red-500 focus:border-red-500 focus:ring-red-500"
+          )}
           placeholder="you@example.com"
           aria-describedby="email-description"
+          aria-invalid={!!errors.email}
+          {...register("email")}
         />
+        {errors.email && (
+          <p className="text-sm text-red-500 mt-1" id="email-error">
+            {errors.email.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -124,18 +153,25 @@ export function SignInForm({
         </div>
         <input
           id="password"
-          name="password"
           type="password"
           autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
-          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-2 disabled:opacity-50"
+          className={cn(
+            "block w-full rounded-md border border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-2 disabled:opacity-50",
+            errors.password &&
+              "border-red-500 focus:border-red-500 focus:ring-red-500"
+          )}
           placeholder="••••••••"
           minLength={8}
           aria-describedby="password-description"
+          aria-invalid={!!errors.password}
+          {...register("password")}
         />
+        {errors.password && (
+          <p className="text-sm text-red-500 mt-1" id="password-error">
+            {errors.password.message}
+          </p>
+        )}
       </div>
 
       <button
