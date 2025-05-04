@@ -84,7 +84,6 @@ export default function ProductGrid({
       }
     };
 
-    // Only fetch if products are not passed as prop
     if (!initialProducts || initialProducts.length === 0) {
       fetchProducts();
     } else {
@@ -95,7 +94,7 @@ export default function ProductGrid({
 
   if (error) {
     return (
-      <div className="p-6 text-center text-red-500">
+      <div className="p-6 text-center text-red-500 dark:text-red-400">
         {error}
         <Button
           variant="outline"
@@ -112,18 +111,20 @@ export default function ProductGrid({
     return (
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <Skeleton className="h-8 w-48" />
-          {title === "New arrivals" && <Skeleton className="h-4 w-20" />}
+          <Skeleton className="h-8 w-48 dark:bg-zinc-800" />
+          {title === "New arrivals" && (
+            <Skeleton className="h-4 w-20 dark:bg-zinc-800" />
+          )}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {Array.from({ length: limit }).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
+            <Card key={i} className="overflow-hidden dark:bg-zinc-900">
               <div className="flex flex-col h-full">
-                <Skeleton className="aspect-square w-full" />
+                <Skeleton className="aspect-square w-full dark:bg-zinc-800" />
                 <div className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-8 w-full mt-4" />
+                  <Skeleton className="h-4 w-full dark:bg-zinc-800" />
+                  <Skeleton className="h-4 w-1/2 dark:bg-zinc-800" />
+                  <Skeleton className="h-8 w-full mt-4 dark:bg-zinc-800" />
                 </div>
               </div>
             </Card>
@@ -136,7 +137,7 @@ export default function ProductGrid({
   return (
     <section className="px-4 py-8 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold tracking-tight">
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           {title}
           <span className="ml-2 text-muted-foreground text-sm font-normal">
             ({products.length} products)
@@ -179,12 +180,12 @@ export default function ProductGrid({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <Card className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
+                  <Card className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full dark:bg-zinc-900 dark:border-zinc-800">
                     <Link
                       href={`/products/${product._id}`}
                       className="grid grid-cols-1 md:grid-cols-2 h-full"
                     >
-                      <div className="relative aspect-square bg-gray-50">
+                      <div className="relative aspect-square bg-gray-50 dark:bg-zinc-800">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
@@ -193,7 +194,7 @@ export default function ProductGrid({
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-zinc-600">
                             <ImageOff className="h-12 w-12" />
                           </div>
                         )}
@@ -213,13 +214,13 @@ export default function ProductGrid({
 
                       <div className="p-6 flex flex-col">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-md mb-2 line-clamp-2">
+                          <h3 className="font-semibold text-md mb-2 line-clamp-2 text-gray-900 dark:text-gray-100">
                             {product.name}
                           </h3>
                           <div className="flex items-center gap-2 mb-3">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm">
+                              <span className="text-sm dark:text-gray-300">
                                 {product.rating?.toFixed(1) || "4.8"}
                               </span>
                             </div>
@@ -227,7 +228,7 @@ export default function ProductGrid({
                               ({product.reviews || 24} reviews)
                             </span>
                           </div>
-                          <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">
                             {product.description}
                           </p>
                         </div>
@@ -236,7 +237,7 @@ export default function ProductGrid({
                           <div>
                             {product.discount ? (
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-lg">
+                                <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
                                   {formatPrice(
                                     product.price * (1 - product.discount / 100)
                                   )}
@@ -246,14 +247,14 @@ export default function ProductGrid({
                                 </span>
                               </div>
                             ) : (
-                              <span className="font-bold text-lg">
+                              <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
                                 {formatPrice(product.price)}
                               </span>
                             )}
                           </div>
                           <Button
                             size="lg"
-                            className="gap-2"
+                            className="gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
                             onClick={(e) => {
                               e.preventDefault();
                               addToCart(product);
@@ -281,12 +282,12 @@ export default function ProductGrid({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="group overflow-hidden hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
+              <Card className="group overflow-hidden hover:shadow-md transition-shadow duration-300 h-full flex flex-col dark:bg-zinc-900 dark:border-zinc-800">
                 <Link
                   href={`/products/${product._id}`}
                   className="flex flex-col h-full"
                 >
-                  <div className="relative aspect-square bg-gray-50">
+                  <div className="relative aspect-square bg-gray-50 dark:bg-zinc-800">
                     {product.images?.[0] ? (
                       <img
                         src={product.images[0]}
@@ -295,7 +296,7 @@ export default function ProductGrid({
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-zinc-600">
                         <ImageOff className="h-8 w-8" />
                       </div>
                     )}
@@ -315,7 +316,7 @@ export default function ProductGrid({
                       )}
                     </div>
                     <button
-                      className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-red-500 hover:text-white transition-colors"
+                      className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-red-500 hover:text-white transition-colors dark:bg-zinc-700/80"
                       onClick={(e) => {
                         e.preventDefault();
                         // Add to wishlist
@@ -327,7 +328,7 @@ export default function ProductGrid({
 
                   <div className="p-4 flex flex-col flex-1">
                     <div className="mb-2">
-                      <h3 className="font-medium text-sm sm:text-base line-clamp-2">
+                      <h3 className="font-medium text-sm sm:text-base line-clamp-2 text-gray-900 dark:text-gray-100">
                         {product.name}
                       </h3>
                       {product.category && (
@@ -341,7 +342,7 @@ export default function ProductGrid({
                       <div className="mb-3">
                         {product.discount ? (
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm sm:text-base">
+                            <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
                               {formatPrice(
                                 product.price * (1 - product.discount / 100)
                               )}
@@ -351,14 +352,14 @@ export default function ProductGrid({
                             </span>
                           </div>
                         ) : (
-                          <span className="font-semibold text-sm sm:text-base">
+                          <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
                             {formatPrice(product.price)}
                           </span>
                         )}
                       </div>
                       <Button
                         size="sm"
-                        className="w-full gap-2"
+                        className="w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
                         onClick={(e) => {
                           e.preventDefault();
                           addToCart(product);

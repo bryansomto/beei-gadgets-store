@@ -110,7 +110,7 @@ export function SignInForm({
       <div className="space-y-2">
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           Email address
         </label>
@@ -120,9 +120,11 @@ export function SignInForm({
           autoComplete="email"
           disabled={isLoading}
           className={cn(
-            "block w-full rounded-md border border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-2 disabled:opacity-50",
+            "block w-full rounded-md border border-gray-300 dark:border-zinc-600 shadow-sm",
+            "focus:border-primary focus:ring-primary dark:focus:border-primary dark:focus:ring-primary",
+            "p-2 disabled:opacity-50 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100",
             errors.email &&
-              "border-red-500 focus:border-red-500 focus:ring-red-500"
+              "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
           )}
           placeholder="you@example.com"
           aria-describedby="email-description"
@@ -130,7 +132,10 @@ export function SignInForm({
           {...register("email")}
         />
         {errors.email && (
-          <p className="text-sm text-red-500 mt-1" id="email-error">
+          <p
+            className="text-sm text-red-500 dark:text-red-400 mt-1"
+            id="email-error"
+          >
             {errors.email.message}
           </p>
         )}
@@ -140,7 +145,7 @@ export function SignInForm({
         <div className="flex items-center justify-between">
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Password
           </label>
@@ -157,9 +162,11 @@ export function SignInForm({
           autoComplete="current-password"
           disabled={isLoading}
           className={cn(
-            "block w-full rounded-md border border-gray-300 shadow-sm focus:border-primary focus:ring-primary p-2 disabled:opacity-50",
+            "block w-full rounded-md border border-gray-300 dark:border-zinc-600 shadow-sm",
+            "focus:border-primary focus:ring-primary dark:focus:border-primary dark:focus:ring-primary",
+            "p-2 disabled:opacity-50 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100",
             errors.password &&
-              "border-red-500 focus:border-red-500 focus:ring-red-500"
+              "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
           )}
           placeholder="••••••••"
           minLength={8}
@@ -168,7 +175,10 @@ export function SignInForm({
           {...register("password")}
         />
         {errors.password && (
-          <p className="text-sm text-red-500 mt-1" id="password-error">
+          <p
+            className="text-sm text-red-500 dark:text-red-400 mt-1"
+            id="password-error"
+          >
             {errors.password.message}
           </p>
         )}
@@ -180,7 +190,8 @@ export function SignInForm({
         className={cn(
           buttonVariants({ size: "lg" }),
           "w-full flex justify-center",
-          isLoading && "cursor-not-allowed"
+          isLoading && "cursor-not-allowed",
+          "bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
         )}
         aria-busy={isLoading}
       >

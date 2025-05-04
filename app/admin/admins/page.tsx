@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { withSwal } from "react-sweetalert2";
-import { MailIcon, Loader2 } from "lucide-react";
+import { MailIcon, Loader2, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -30,6 +30,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { prettyDate } from "@/lib/date";
 import colors from "@/lib/colors/swalAlerts";
+import { Card } from "@/components/ui/card";
 
 interface Admin {
   _id: string;
@@ -63,8 +64,14 @@ export function AdminsPage({ swal }: AdminsPageProps) {
   const loadAdmins = async () => {
     try {
       setIsLoading(true);
-      const { data } = await axios.get<Admin[]>("/api/admins");
-      setAdminEmails(data);
+      const { data } = await axios.get<Admin[] | { admins: Admin[] }>(
+        "/api/admins"
+      );
+
+      // Handle both response formats
+      const admins = Array.isArray(data) ? data : data?.admins || [];
+      setAdminEmails(admins);
+      console.log("Loaded admins:", admins);
     } catch (error) {
       console.error("Failed to load admins", error);
       toast({
@@ -72,6 +79,7 @@ export function AdminsPage({ swal }: AdminsPageProps) {
         description: "Failed to load admin list",
         variant: "destructive",
       });
+      setAdminEmails([]);
     } finally {
       setIsLoading(false);
     }
@@ -82,22 +90,19 @@ export function AdminsPage({ swal }: AdminsPageProps) {
       setIsSubmitting(true);
       await axios.post("/api/admins", { email: formData.email });
 
-      swal.fire({
+      toast({
         title: "Success!",
-        text: "Admin added successfully",
-        icon: "success",
-        confirmButtonColor: colors.green,
+        description: "Admin added successfully",
       });
 
       form.reset();
       await loadAdmins();
     } catch (error: any) {
       console.error("Failed to add admin", error);
-      swal.fire({
+      toast({
         title: "Error!",
-        text: error.response?.data?.message || "Failed to add admin",
-        icon: "error",
-        confirmButtonColor: colors.red,
+        description: error.response?.data?.message || "Failed to add admin",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -142,99 +147,105 @@ export function AdminsPage({ swal }: AdminsPageProps) {
 
   return (
     <Layout requiresAuth>
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Admin Management
-          </h2>
-          <p className="text-muted-foreground">
-            Add or remove administrators for the store
-          </p>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="p-4 w-full lg:w-[400px]">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Add New Admin</h2>
+          </div>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(addAdmin)}
-            className="space-y-4 max-w-md"
-          >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Admin Email</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <MailIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="admin@example.com"
-                        className="pl-8"
-                        {...field}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                "Add Admin"
-              )}
-            </Button>
-          </form>
-        </Form>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(addAdmin)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin Email</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <MailIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="admin@example.com"
+                          className="pl-8"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  "Add Admin"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </Card>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableCaption>Current administrators</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Added On</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
+        <Card className="p-4 flex-1">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Current Administrators</h2>
+          </div>
+
+          <div className="rounded-lg border shadow-sm overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-                  </TableCell>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Added On</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : adminEmails.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    No administrators found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                adminEmails.map((admin) => (
-                  <TableRow key={admin._id}>
-                    <TableCell className="font-medium">{admin.email}</TableCell>
-                    <TableCell>
-                      {admin.createdAt ? prettyDate(admin.createdAt) : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteAdmin(admin._id, admin.email)}
-                      >
-                        Remove
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="h-24 text-center">
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin" />
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ) : adminEmails.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="h-24 text-center">
+                      No administrators found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  adminEmails.map((admin) => (
+                    <TableRow key={admin._id}>
+                      <TableCell className="font-medium">
+                        {admin.email}
+                      </TableCell>
+                      <TableCell>
+                        {admin.createdAt ? prettyDate(admin.createdAt) : "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteAdmin(admin._id, admin.email)}
+                          className="gap-2"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       </div>
     </Layout>
   );

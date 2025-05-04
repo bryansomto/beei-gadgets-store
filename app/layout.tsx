@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from "../context/CartContext";
+import ThemeProvider from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,12 +34,19 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <CartProvider>
-            <Navbar />
-            {children}
-            <Footer />
-            <Toaster />
-          </CartProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <CartProvider>
+              <Navbar />
+              {children}
+              <Footer />
+              <Toaster />
+            </CartProvider>
+          </ThemeProvider>
         </body>
       </Providers>
     </html>

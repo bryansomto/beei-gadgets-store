@@ -31,22 +31,22 @@ export default function Login() {
   };
 
   return (
-    <section className="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-      <MaxWidthWrapper className="max-w-md w-full bg-white rounded-xl shadow-md p-8 sm:p-10">
+    <section className="bg-gray-50 dark:bg-zinc-900 min-h-screen flex items-center justify-center p-4">
+      <MaxWidthWrapper className="max-w-md w-full bg-slate-50 dark:bg-zinc-950 rounded-xl shadow-md p-8 sm:p-10">
         <div className="flex flex-col items-center space-y-6">
           {/* Logo/Branding with aria-label */}
           <Link href="/" className="mb-6" aria-label="Return to homepage">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               <span className="text-primary">beei</span>gadgets
             </h1>
           </Link>
 
           {/* Header with proper heading hierarchy */}
           <header className="text-center space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               Welcome back
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Sign in to access your account
             </p>
           </header>
@@ -54,7 +54,7 @@ export default function Login() {
           {/* Loading overlay with aria attributes */}
           {isLoading && (
             <div
-              className="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center"
+              className="fixed inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
               aria-live="assertive"
               aria-busy="true"
             >
@@ -80,10 +80,10 @@ export default function Login() {
           {/* Divider with aria-hidden */}
           <div className="relative w-full" aria-hidden="true">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+              <span className="px-2 bg-white dark:bg-zinc-950 text-gray-500">
                 or continue with
               </span>
             </div>
@@ -99,7 +99,7 @@ export default function Login() {
           />
 
           {/* Sign Up Link */}
-          <p className="text-sm text-gray-600 text-center">
+          <p className="text-sm text-gray-500 text-center">
             Don't have an account?{" "}
             <Link
               href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}

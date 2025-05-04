@@ -44,8 +44,10 @@ export default function ProductsPage() {
   async function fetchProducts() {
     try {
       setIsLoading(true);
-      const { data } = await axios.get<Product[]>("/api/products");
-      setProducts(data);
+      const { data } = await axios.get<{ products: Product[] }>(
+        "/api/products"
+      ); // Changed to expect object with products array
+      setProducts(data.products || []); // Handle case where products might be undefined
     } catch (error) {
       console.error("Failed to fetch products", error);
       toast({
@@ -53,6 +55,7 @@ export default function ProductsPage() {
         description: "Failed to load products",
         variant: "destructive",
       });
+      setProducts([]); // Ensure products is always an array
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +135,7 @@ export default function ProductsPage() {
 
   return (
     <Layout requiresAuth>
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {showForm && (
           <Card className="p-4 w-full lg:w-[400px]">
             <div className="flex justify-between items-center mb-4">

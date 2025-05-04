@@ -1,8 +1,30 @@
+// app/api/cart/route.ts
 import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { Cart } from "@/models/Cart";
-import { ICartItem } from "@/models/CartItem";
 import { mongooseConnect } from "@/lib/mongoose";
+import { Types, FlattenMaps } from "mongoose";
+import { ICartItem } from "@/models/CartItem";
+import { CartApiResponse } from "@/types/cart";
+
+interface IProduct {
+  _id: Types.ObjectId;
+  name: string;
+  price: number;
+  images?: string[];
+}
+
+interface PopulatedCartItem extends Omit<ICartItem, "productId"> {
+  productId: IProduct;
+}
+
+interface CartWithItems {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  items: PopulatedCartItem[];
+  total: number;
+  __v?: number;
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,43 +32,47 @@ export async function GET(req: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+      return NextResponse.json({ items: [], total: 0 }, { status: 200 });
     }
 
     const userId = session.user.id;
 
-    const cart = await Cart.findOne({ userId: userId }).populate({
-      path: "items",
-      populate: { path: "productId" },
-    })
-    
-    // await Cart.deleteMany({ userId: null });
-    // await CartItem.deleteMany({ userId: null });
-
-    console.log(`User cart: ${JSON.stringify(cart)}`)
+    const cart = await Cart.findOne({ userId })
+      .populate<{ items: PopulatedCartItem[] }>({
+        path: "items",
+        populate: { 
+          path: "productId",
+          select: "name price images"
+        }
+      })
+      .lean()
+      .exec() as CartWithItems | null;
 
     if (!cart) {
       return NextResponse.json({ items: [], total: 0 }, { status: 200 });
     }
 
-    // Format response to include product info
-    const formattedItems = cart.items.map((item: ICartItem) => {
-      const product = item.productId as any;
-      return {
-        _id: item._id,
-        productId: product._id,
-        name: product.name,
-        price: product.price,
-        quantity: item.quantity,
-        image: product.images?.[0] || null,
-      };
-    });
+    // Transform to match frontend CartItem type exactly
+    const items = cart.items.map((item) => ({
+      productId: item.productId._id.toString(),
+      name: item.productId.name,
+      price: item.productId.price,
+      image: item.productId.images?.[0] || "",
+      quantity: item.quantity
+    }));
 
-    console.log(`Formatted items: ${formattedItems}`)
-
-    return NextResponse.json({ items: formattedItems, total: cart.total }, { status: 200 });
+    return NextResponse.json(
+      { 
+        items,  // Must match CartItem[] type exactly
+        total: cart.total 
+      }, 
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching cart:", error);
-    return NextResponse.json({ message: "Failed to load cart" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to load cart" }, 
+      { status: 500 }
+    );
   }
 }

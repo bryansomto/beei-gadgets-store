@@ -47,7 +47,7 @@ export default function RelatedProducts({
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-32 h-40 bg-gray-100 rounded-lg animate-pulse"
+            className="flex-shrink-0 w-32 h-40 bg-gray-100 dark:bg-zinc-900 rounded-lg animate-pulse"
           />
         ))}
       </div>
@@ -64,7 +64,7 @@ export default function RelatedProducts({
             href={`/products/${product._id}`}
             className="flex-shrink-0 w-32 group" // Fixed width for consistent sizing
           >
-            <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
+            <div className="aspect-square bg-gray-50 dark:bg-zinc-800 rounded-lg overflow-hidden">
               <Image
                 src={product.images[0]}
                 alt={product.name}
@@ -73,10 +73,10 @@ export default function RelatedProducts({
                 className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
               />
             </div>
-            <h3 className="mt-1.5 text-xs font-medium text-gray-900 line-clamp-2">
+            <h3 className="mt-1.5 text-xs font-medium text-gray-900 dark:text-gray-300 line-clamp-1">
               {product.name}
             </h3>
-            <p className="mt-0.5 text-xs text-gray-600">
+            <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
               {formatPrice(product.price)}
             </p>
           </Link>

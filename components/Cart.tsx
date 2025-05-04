@@ -16,6 +16,7 @@ export function Cart() {
     clearCart,
     cartTotal,
     cartCount,
+    syncCartToDB,
   } = useCart();
 
   return (
@@ -46,7 +47,7 @@ export function Cart() {
       ) : (
         <div className="space-y-4">
           <div className="space-y-4">
-            {cartItems.map((item) => (
+            {cartItems.map((item, index) => (
               <div
                 key={item.productId}
                 className="flex items-center gap-4 p-2 border rounded-lg"
@@ -91,7 +92,12 @@ export function Cart() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeFromCart(item.productId)}
+                  onClick={async () => {
+                    if (syncCartToDB && cartItems && cartItems.length > 0) {
+                      await syncCartToDB(cartItems);
+                    }
+                    await removeFromCart(item.productId);
+                  }}
                 >
                   <X className="h-4 w-4" />
                 </Button>

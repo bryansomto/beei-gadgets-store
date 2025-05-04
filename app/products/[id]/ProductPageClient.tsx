@@ -30,7 +30,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
 
   const handleThumbnailClick = useCallback((index: number) => {
     setCurrentImage(index);
-    setIsZoomed(false); // Reset zoom when changing images
+    setIsZoomed(false);
   }, []);
 
   const toggleZoom = useCallback(() => {
@@ -40,7 +40,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
   const primaryImage = product.images[currentImage];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-slate-50 dark:bg-zinc-900 min-h-screen">
       {/* Navigation Back Button */}
       <nav aria-label="Back to products">
         <Link
@@ -63,7 +63,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
           <div className="space-y-4">
             {/* Main Image with Zoom */}
             <div
-              className={`relative aspect-square bg-gray-50 rounded-lg overflow-hidden group ${
+              className={`relative aspect-square bg-gray-50 dark:bg-zinc-800 rounded-lg overflow-hidden group ${
                 isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
               }`}
               onClick={toggleZoom}
@@ -102,10 +102,10 @@ export default function ProductPageClient({ product }: { product: Product }) {
                   <button
                     key={index}
                     onClick={() => handleThumbnailClick(index)}
-                    className={`relative aspect-square bg-gray-50 rounded-md overflow-hidden transition-all ${
+                    className={`relative aspect-square bg-gray-50 dark:bg-zinc-800 rounded-md overflow-hidden transition-all ${
                       currentImage === index
                         ? "ring-2 ring-primary"
-                        : "hover:ring-1 ring-gray-300"
+                        : "hover:ring-1 ring-gray-300 dark:ring-zinc-600"
                     }`}
                     role="tab"
                     aria-selected={currentImage === index}
@@ -135,7 +135,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
           <div className="space-y-6">
             {/* Product Header */}
             <header>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
                 {product.name}
               </h1>
               <div className="mt-2 flex flex-wrap items-center gap-4">
@@ -150,18 +150,18 @@ export default function ProductPageClient({ product }: { product: Product }) {
                       className={`h-5 w-5 ${
                         i < Math.floor(product.rating)
                           ? "text-yellow-400 fill-yellow-400"
-                          : "text-gray-300"
+                          : "text-gray-300 dark:text-zinc-600"
                       }`}
                       aria-hidden="true"
                     />
                   ))}
-                  <span className="ml-2 text-sm text-gray-600">
+                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                     {product.rating?.toFixed(1)} ({product.reviews} reviews)
                   </span>
                 </div>
                 {/* Date Added */}
                 {product.createdAt && (
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     Added {new Date(product.createdAt).toLocaleDateString()}
                   </span>
                 )}
@@ -170,12 +170,14 @@ export default function ProductPageClient({ product }: { product: Product }) {
 
             {/* Price and Stock */}
             <div className="space-y-2">
-              <p className="text-gray-900 font-semibold text-2xl">
+              <p className="text-gray-900 dark:text-gray-100 font-semibold text-2xl">
                 {formatPrice(product.price)}
               </p>
               <p
                 className={`text-sm ${
-                  product.stock > 0 ? "text-green-600" : "text-red-600"
+                  product.stock > 0
+                    ? "text-green-600 dark:text-green-500"
+                    : "text-red-600 dark:text-red-500"
                 }`}
               >
                 {product.stock > 0
@@ -185,9 +187,11 @@ export default function ProductPageClient({ product }: { product: Product }) {
             </div>
 
             {/* Description */}
-            <article className="prose max-w-none">
-              <h2 className="text-sm font-medium text-gray-900">Description</h2>
-              <p className="mt-2 text-gray-600 whitespace-pre-line">
+            <article className="prose max-w-none dark:prose-invert">
+              <h2 className="text-sm font-medium text-gray-900 dark:text-gray-300">
+                Description
+              </h2>
+              <p className="mt-2 text-gray-600 dark:text-gray-400 whitespace-pre-line">
                 {product.description}
               </p>
             </article>
@@ -197,17 +201,20 @@ export default function ProductPageClient({ product }: { product: Product }) {
               <section aria-labelledby="specifications-heading">
                 <h2
                   id="specifications-heading"
-                  className="text-sm font-medium text-gray-900 mb-4"
+                  className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-4"
                 >
                   Specifications
                 </h2>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {Object.entries(product.properties).map(([key, value]) => (
-                    <div key={key} className="border-b border-gray-100 pb-2">
-                      <dt className="text-sm text-gray-500 capitalize">
+                    <div
+                      key={key}
+                      className="border-b border-gray-100 dark:border-zinc-700 pb-2"
+                    >
+                      <dt className="text-sm text-gray-500 dark:text-gray-400 capitalize">
                         {key}
                       </dt>
-                      <dd className="text-sm font-medium text-gray-900 mt-1">
+                      <dd className="text-sm font-medium text-gray-900 dark:text-gray-200 mt-1">
                         {value}
                       </dd>
                     </div>
@@ -220,7 +227,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
               <Button
                 size="lg"
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
                 disabled={product.stock <= 0}
                 aria-label="Add to cart"
               >
@@ -230,7 +237,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
               <Button
                 variant="outline"
                 size="lg"
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 border-gray-300 dark:border-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-800"
                 aria-label="Share product"
               >
                 <FaShareAlt className="h-5 w-5" />
@@ -243,7 +250,10 @@ export default function ProductPageClient({ product }: { product: Product }) {
 
       {/* Related Products Section */}
       <section className="mt-16" aria-labelledby="related-products-heading">
-        <h2 id="related-products-heading" className="text-xl font-bold mb-6">
+        <h2
+          id="related-products-heading"
+          className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100"
+        >
           You may also like
         </h2>
         <RelatedProducts

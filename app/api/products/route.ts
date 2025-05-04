@@ -93,6 +93,8 @@ export async function GET(req: NextRequest) {
       Product.countDocuments(filter)
     ]);
 
+    console.log(products);
+
     // ✅ Always return products as an array
     return NextResponse.json({
       success: true,

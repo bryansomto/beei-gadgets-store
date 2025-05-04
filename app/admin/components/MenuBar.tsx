@@ -10,12 +10,13 @@ import { usePathname } from "next/navigation";
 export default function MenuBar() {
   const inactiveLink = "";
   const activeLink = `${inactiveLink} bg-highlight text-primary font-semibold rounded-sm`;
-  const inactiveIcon = "w-6 h-6 hover:text-zinc-800 transition-all";
+  const inactiveIcon =
+    "w-6 h-6 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all";
   const activeIcon = inactiveIcon + " text-primary";
   const pathname = usePathname();
 
   return (
-    <aside className="text-gray-600 p-4 bg-bgGray transition-all">
+    <aside className="text-gray-600 dark:text-gray-400  p-4 bg-bgGray transition-all">
       <nav className="grid grid-flow-col justify-between sm:justify-center sm:gap-20">
         <HoverCard>
           <HoverCardTrigger asChild>

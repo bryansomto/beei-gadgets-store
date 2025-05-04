@@ -30,7 +30,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-slate-50 flex flex-col space-y-24 sm:space-y-30 pt-12 md:pt-20">
+    <div className="bg-slate-50 dark:bg-zinc-900 flex flex-col space-y-24 sm:space-y-30 pt-12 md:pt-20">
       {/* <h2 className="absolute top-1/2 left1/2 transform -translate-x-1/2 -translate-y-1/2 order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
           Featured Products
         </h2> */}
@@ -39,9 +39,9 @@ export default function Home() {
           {/* <div className="absolute w-28 left-0 -top-20 hidden lg:block">
                 <img src="/beei-1.png" className="w-full" />
               </div> */}
-          <h1 className="relative w-fit tracking-tight text-balance font-bold !leading-tight text-gray-900 text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="relative w-fit tracking-tight text-balance font-bold !leading-tight text-gray-900 dark:text-gray-100 text-5xl md:text-6xl lg:text-7xl">
             Your one-stop{" "}
-            <span className="bg-green-600 px-2 text-white">Gadget</span> shop
+            <span className="bg-green-600 px-2 text-gray-100">Gadget</span> shop
             for mobile and home devices.
           </h1>
           <p className="mt-8 text-lg lg:pr-10 max-w-prose text-center lg:text-left text-balance md:text-wrap">
@@ -159,10 +159,10 @@ export default function Home() {
       </div>
 
       {/* value proposition section */}
-      <section className="bg-slate-100">
+      <section className="bg-slate-100 dark:bg-zinc-950">
         <MaxWidthWrapper className="flex flex-col items-center gap-16 md:gap-24">
           <div className="flex flex-col lg:flex-row items-center gap-4 sm:gap-6">
-            <h2 className="order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
+            <h2 className="order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900 dark:text-gray-100">
               What our
               <span className="relative px-2">
                 customers{" "}
@@ -196,7 +196,7 @@ export default function Home() {
                 />
                 <div className="flex flex-col">
                   <p className="font-semibold">Jonathan</p>
-                  <div className="flex gap-1.5 items-center text-zinc-600">
+                  <div className="flex gap-1.5 items-center text-zinc-600 dark:text-gray-100">
                     <Check className="h-4 w-4 stroke-[3px] text-green-600" />
                     <p className="text-sm">Verified Purchase</p>
                   </div>
@@ -231,7 +231,7 @@ export default function Home() {
                 />
                 <div className="flex flex-col">
                   <p className="font-semibold">Bryan</p>
-                  <div className="flex gap-1.5 items-center text-zinc-600">
+                  <div className="flex gap-1.5 items-center text-zinc-600 dark:text-gray-100">
                     <Check className="h-4 w-4 stroke-[3px] text-green-600" />
                     <p className="text-sm">Verified Purchase</p>
                   </div>

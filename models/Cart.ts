@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import './CartItem';
 import { ICartItem } from './CartItem';
 
 export interface ICart extends Document {

@@ -3,56 +3,125 @@
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { SignInButtonWithGoogle } from "@/components/SessionButtons";
 import { SignUpForm } from "@/components/SignUpForm";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 
 const Register = () => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  const handleAuthStart = () => {
+    setIsLoading(true);
+  };
+
+  const handleAuthEnd = (success: boolean = true) => {
+    setIsLoading(false);
+    if (!success) {
+      toast({
+        title: "Authentication Error",
+        description: "There was an issue during sign in",
+        variant: "destructive",
+      });
+    }
+  };
   return (
-    <section>
-      <MaxWidthWrapper className="pb-24 pt-10 lg:col-span-1 sm:pb-32 lg:gap-x-0 xl:gap-x-8 lg:pt-16 xl:pt-24 lg:pb-52">
+    <section className="bg-gray-50 dark:bg-zinc-900 min-h-screen flex items-center justify-center p-4">
+      <MaxWidthWrapper className="max-w-md w-full bg-slate-50 dark:bg-zinc-950 rounded-xl shadow-md p-8 sm:p-10">
         <div className="flex flex-col justify-center items-center col-span-1 gap-4">
-          <h2 className="mt-2 mb-8 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
-            Register to continue
-          </h2>
-          <div className="flex flex-col gap-8 items-center">
-            <SignUpForm />
-          </div>
-          <div className="flex flex-col gap-2 items-center">
-            <div className="flex flex-col gap-2 items-center">
-              <p className="text-sm text-gray-500 mt-4">
-                Already have an account?{" "}
-                <Link
-                  href="/register"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Sign In
-                </Link>
+          <div className="flex flex-col items-center space-y-6">
+            {/* Logo/Branding with aria-label */}
+            <Link href="/" className="mb-6" aria-label="Return to homepage">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                <span className="text-primary">beei</span>gadgets
+              </h1>
+            </Link>
+            {/* Header with proper heading hierarchy */}
+            <header className="text-center space-y-2">
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                Welcome
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Register to create a new account
               </p>
-              <div>
-                <p className="text-sm text-gray-500">or</p>
+            </header>
+
+            {/* Loading overlay with aria attributes */}
+            {isLoading && (
+              <div
+                className="fixed inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+                aria-live="assertive"
+                aria-busy="true"
+              >
+                <Loader2
+                  className="h-8 w-8 animate-spin text-primary"
+                  aria-hidden="true"
+                />
+                <span className="sr-only">Signing in...</span>
               </div>
-              <div>
-                <SignInButtonWithGoogle />
+            )}
+
+            <div className="w-full">
+              <SignUpForm />
+            </div>
+
+            {/* Divider with aria-hidden */}
+            <div className="relative w-full" aria-hidden="true">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-zinc-950 text-gray-500">
+                  or continue with
+                </span>
               </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-sm text-gray-500">
-              By signing in, you agree to our{" "}
-              <a
-                href="/terms"
-                className="font-medium text-primary hover:underline"
+            {/* Google Sign In */}
+            <SignInButtonWithGoogle
+              onAuthStart={handleAuthStart}
+              onAuthEnd={() => handleAuthEnd()}
+              onError={() => handleAuthEnd(false)}
+              callbackUrl={callbackUrl}
+              className="w-full"
+            />
+
+            {/* Sign in Link */}
+            <p className="text-sm text-gray-500 text-center">
+              Already have an account?{" "}
+              <Link
+                href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                className="font-medium text-primary hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                aria-label="Sign up for a new account"
               >
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a
-                href="/privacy"
-                className="font-medium text-primary hover:underline"
-              >
-                Privacy Policy
-              </a>
+                Sign in
+              </Link>
             </p>
+            {/* Legal Links */}
+            <footer className="text-center text-xs text-gray-500 mt-4">
+              <p>
+                By continuing, you agree to our{" "}
+                <Link
+                  href="/terms"
+                  className="font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                  aria-label="View our Terms of Service"
+                >
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy"
+                  className="font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                  aria-label="View our Privacy Policy"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+            </footer>
           </div>
         </div>
       </MaxWidthWrapper>

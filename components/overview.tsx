@@ -1,3 +1,4 @@
+import colors from "@/lib/colors/swalAlerts";
 import {
   BarChart,
   Bar,
@@ -32,7 +33,7 @@ export function Overview() {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="total" fill="#8884d8" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="total" fill={colors.green} radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -4,6 +4,15 @@ import { Cart } from "@/models/Cart";
 import { CartItem } from "@/models/CartItem";
 import Product from "@/models/Product";
 import { NextRequest, NextResponse } from "next/server";
+import { Types } from "mongoose";
+
+interface FrontendCartItem {
+  productId: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,60 +24,78 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = session.user.id;
-    const { cartItems } = await req.json();
-
-    let cart = await Cart.findOne({ userId: userId }).populate("items");
-
-    if (!cart) {
-      cart = await Cart.create({ userId: userId, items: [], total: 0 });
-    }
-
-    const updatedItems: any[] = [];
+    const { cartItems }: { cartItems: FrontendCartItem[] } = await req.json();
 
     if (!Array.isArray(cartItems)) {
-      return new Response("Invalid cart data", { status: 400 });
+      return NextResponse.json({ message: "Invalid cart data" }, { status: 400 });
     }
 
-    console.log("Cart items before processing:", cart.items);
+    // Get or create cart
+    let cart = await Cart.findOne({ userId }).populate("items") || 
+               await Cart.create({ userId, items: [], total: 0 });
 
-    for (const item of cartItems) {
-      const product = await Product.findById(item.productId);
-      if (!product) throw new Error(`Product not found: ${item.productId}`);
+    // Create a map of incoming items for easy lookup
+    const incomingItemsMap = new Map<string, FrontendCartItem>();
+    cartItems.forEach(item => {
+      incomingItemsMap.set(item.productId, item);
+    });
 
-      let cartItemFound = await CartItem.findOne({
-        _id: { $in: cart.items },
-        productId: item.productId,
-      });
+    // Process existing cart items
+    const itemsToKeep: Types.ObjectId[] = [];
+    let total = 0;
 
-      if (cartItemFound) {
-        cartItemFound.quantity = item.quantity;
-        cartItemFound.price = product.price; // Update price in case it's changed
-        await cartItemFound.save();
-      } else {
-        cartItemFound = await CartItem.create({
-          productId: product._id,
-          quantity: item.quantity,
-          name: product.name,
-          image: product.images[0], // Use the first image
-          price: product.price,
-        });
-        cart.items.push(cartItemFound); // Add the new item to the cart
+    // First pass: update existing items
+    for (const existingItem of cart.items) {
+      const existingItemId = existingItem.productId.toString();
+      const incomingItem = incomingItemsMap.get(existingItemId);
+
+      if (incomingItem) {
+        // Update existing item
+        existingItem.quantity = incomingItem.quantity;
+        existingItem.price = incomingItem.price;
+        await existingItem.save();
+        itemsToKeep.push(existingItem._id);
+        total += incomingItem.quantity * incomingItem.price;
+        incomingItemsMap.delete(existingItemId); // Mark as processed
+      }
+    }
+
+    // Second pass: add new items
+    for (const [productId, incomingItem] of incomingItemsMap) {
+      const product = await Product.findById(productId);
+      if (!product) {
+        console.warn(`Product not found: ${productId}`);
+        continue;
       }
 
-      updatedItems.push(cartItemFound);
+      const newItem = await CartItem.create({
+        productId: product._id,
+        quantity: incomingItem.quantity,
+        price: incomingItem.price,
+        name: product.name,
+        image: product.images?.[0] || '',
+      });
+      
+      itemsToKeep.push(newItem._id);
+      total += incomingItem.quantity * incomingItem.price;
     }
 
-    // Ensure the total is correctly updated based on all items
-    cart.total = cart.items.reduce(
-      (sum: number, item: any) => sum + item.quantity * item.price,
-      0
-    );
-
+    // Update cart with only the items we want to keep
+    cart.items = itemsToKeep;
+    cart.total = total;
     await cart.save();
 
-    return NextResponse.json({ message: "Cart saved successfully" }, { status: 200 });
+    return NextResponse.json({ 
+      success: true,
+      itemCount: itemsToKeep.length,
+      total
+    }, { status: 200 });
+
   } catch (error) {
     console.error("Error saving cart:", error);
-    return NextResponse.json({ message: "Failed to save cart" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to save cart" }, 
+      { status: 500 }
+    );
   }
 }

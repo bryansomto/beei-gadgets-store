@@ -22,57 +22,90 @@ export async function POST(req: NextRequest) {
   const userId = session.user.id;
   const { guestItems }: { guestItems: GuestItem[] } = await req.json();
 
-  console.log("Received guestItems:", guestItems);
-
   if (!Array.isArray(guestItems) || guestItems.length === 0) {
     return NextResponse.json({ message: "No guest items provided" }, { status: 400 });
   }
 
+  // Merge and deduplicate guest items first
+  const mergedGuestItems = guestItems.reduce<Record<string, GuestItem>>((acc, item) => {
+    const id = item.productId;
+    if (!acc[id]) {
+      acc[id] = { ...item };
+    } else {
+      acc[id].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+
+  // Start transaction to ensure data consistency
   let cart = await Cart.findOne({ userId }).populate("items");
 
   if (!cart) {
-    // If no cart exists, create a new one
     cart = await Cart.create({ userId, items: [], total: 0 });
   }
 
-  for (const guestItem of guestItems) {
+  // Create a map of existing items for quick lookup
+  const existingItemsMap = new Map<string, { _id: string; productId: string; quantity: number }>(
+    cart.items.map((item: any) => [item.productId.toString(), item])
+  );
+
+  // Process each merged guest item
+  for (const guestItem of Object.values(mergedGuestItems)) {
     const product = await Product.findById(guestItem.productId);
-    if (!product){
-      return NextResponse.json({ message: `Product not found: ${guestItem.productId}` }, { status: 404 });
-    };
-    if (!guestItem.productId || !guestItem.quantity || !guestItem.price) {
-      return NextResponse.json({ message: "Invalid guest item data" }, { status: 400 });
+    if (!product) {
+      console.warn(`Product not found: ${guestItem.productId}`);
+      continue; // Skip instead of returning error
     }
-    const existingItem = await CartItem.findOne({
-      _id: { $in: cart.items },
-      productId: product._id,
-    });
+
+    const existingItem = existingItemsMap.get(guestItem.productId);
 
     if (existingItem) {
-      existingItem.quantity += guestItem.quantity;
-      await existingItem.save();
+      // Update existing item
+      const dbItem = await CartItem.findById(existingItem._id);
+      if (dbItem) {
+        // Ensure we don't exceed available stock if needed
+        dbItem.quantity = Math.min(dbItem.quantity + guestItem.quantity, product.stock || Infinity);
+        await dbItem.save();
+      }
     } else {
+      // Create new item
       const newItem = await CartItem.create({
-        productId: product._id,
-        quantity: guestItem.quantity,
-        price: product.price,
+        productId: guestItem.productId,
+        quantity: Math.min(guestItem.quantity, product.stock || Infinity),
+        price: guestItem.price,
       });
       cart.items.push(newItem);
+      existingItemsMap.set(guestItem.productId, newItem); // Add to map
     }
   }
 
-  // Ensure cart.items is populated correctly before iterating
-  if (!Array.isArray(cart.items)) {
-    console.error("Cart items are not an array:", cart.items);
-    return NextResponse.json({ message: "Cart items format is invalid" }, { status: 400 });
+  // Save cart before repopulating
+  await cart.save();
+
+  // Repopulate to get fresh data
+  const updatedCart = await Cart.findOne({ userId })
+    .populate({
+      path: 'items',
+      populate: {
+        path: 'productId',
+        model: 'Product'
+      }
+    });
+
+  if (!updatedCart) {
+    return NextResponse.json({ message: "Cart not found after update" }, { status: 404 });
   }
 
-  cart.total = cart.items.reduce(
+  // Recalculate total
+  updatedCart.total = updatedCart.items.reduce(
     (sum: number, item: any) => sum + item.quantity * item.price,
     0
   );
 
-  await cart.save();
+  await updatedCart.save();
 
-  return NextResponse.json({ message: "Cart merged successfully" }, { status: 200 });
+  return NextResponse.json({ 
+    message: "Cart merged successfully",
+    cart: updatedCart 
+  }, { status: 200 });
 }

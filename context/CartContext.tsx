@@ -11,15 +11,10 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useRef,
 } from "react";
-
-interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-}
+import { CartItem } from "@/types/cart";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -36,6 +31,7 @@ interface CartContextType {
   clearCart: () => Promise<void>;
   cartTotal: number;
   cartCount: number;
+  syncCartToDB: (items: CartItem[]) => Promise<void>;
 }
 
 interface ProductPreview {
@@ -48,58 +44,141 @@ interface ProductPreview {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const syncTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastSyncedItems = useRef<CartItem[]>([]);
   const { user, status } = useUser();
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  // Load cart from db & localStorage with timeout
+  const syncCartToDB = useCallback(
+    async (items: CartItem[]): Promise<void> => {
+      if (!user || items.length === 0) return;
+
+      if (syncTimeout.current) {
+        clearTimeout(syncTimeout.current);
+      }
+
+      syncTimeout.current = setTimeout(() => {
+        (async () => {
+          try {
+            const deduplicated = Object.values(
+              items.reduce<Record<string, CartItem>>((acc, item) => {
+                if (acc[item.productId]) {
+                  acc[item.productId].quantity += item.quantity;
+                } else {
+                  acc[item.productId] = { ...item };
+                }
+                return acc;
+              }, {})
+            );
+
+            const shouldSync =
+              JSON.stringify(deduplicated) !==
+              JSON.stringify(lastSyncedItems.current);
+
+            if (shouldSync) {
+              await fetch("/api/cart/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cartItems: deduplicated }),
+              });
+
+              lastSyncedItems.current = deduplicated;
+            }
+          } catch (err) {
+            console.error("Debounced sync failed:", err);
+          }
+        })();
+      }, 500);
+
+      return Promise.resolve(); // explicitly return a resolved Promise
+    },
+    [user]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (syncTimeout.current) clearTimeout(syncTimeout.current);
+    };
+  }, []);
+
   useEffect(() => {
     const syncCart = async () => {
       try {
         setIsLoading(true);
         if (status === "authenticated") {
           const localCart = localStorage.getItem("cart");
-          console.log("Local cart before sync:", localCart);
           if (localCart) {
             try {
               const parsedCart = JSON.parse(localCart);
               if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+                const deduplicated = Object.values(
+                  parsedCart.reduce<Record<string, CartItem>>((acc, item) => {
+                    if (acc[item.productId]) {
+                      acc[item.productId].quantity += item.quantity;
+                    } else {
+                      acc[item.productId] = { ...item };
+                    }
+                    return acc;
+                  }, {})
+                );
+
                 await fetch("/api/cart/merge", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ guestItems: parsedCart }),
+                  body: JSON.stringify({ guestItems: deduplicated }),
                 });
                 localStorage.removeItem("cart");
-              } else {
-                console.log("Local cart is empty; no merge necessary.");
               }
             } catch (err) {
               console.error("Failed to sync local cart:", err);
             }
           }
-
           const res = await fetch("/api/cart");
+          if (!res.ok) throw new Error("Failed to fetch cart");
+
           const data = await res.json();
-          setCartItems(data.items || []);
+
+          // Ensure the response matches our expected type
+          if (data && Array.isArray(data.items)) {
+            setCartItems(
+              data.items.map(
+                (item: {
+                  productId: string;
+                  name: string;
+                  price: number;
+                  image: string;
+                  quantity: number;
+                }): CartItem => ({
+                  productId: item.productId,
+                  name: item.name,
+                  price: item.price,
+                  image: item.image,
+                  quantity: item.quantity,
+                })
+              )
+            );
+          } else {
+            setCartItems([]);
+          }
         }
       } catch (err) {
         console.error("Error syncing cart:", err);
         setError("Failed to load cart.");
       } finally {
-        setIsLoading(false); // Ensure this is always called
+        setIsLoading(false);
       }
     };
 
     syncCart();
   }, [status]);
 
-  // Save cart to localStorage with timeout
   useEffect(() => {
     if (isLoading) return;
     try {
-      console.log("Saving to localStorage:", cartItems);
       localStorage.setItem("cart", JSON.stringify(cartItems));
     } catch (err) {
       console.error("Error saving cart:", err);
@@ -109,33 +188,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback(
     async (product: ProductPreview) => {
       try {
+        let newItems: CartItem[] = [];
+
         await withTimeout(
           new Promise<void>((resolve) => {
             setCartItems((prevItems) => {
-              const existingItem = prevItems.find(
+              const existingItemIndex = prevItems.findIndex(
                 (item) => item.productId === product._id
               );
 
-              const newItems = existingItem
-                ? prevItems.map((item) =>
-                    item.productId === product._id
-                      ? { ...item, quantity: item.quantity + 1 }
-                      : item
-                  )
-                : [
-                    ...prevItems,
-                    {
-                      productId: product._id,
-                      price: product.price,
-                      quantity: 1,
-                      name: product.name,
-                      image: product.images[0] || "",
-                    },
-                  ];
-
-              // ✅ only sync to DB if logged in
-              if (user) {
-                syncCartToDB(newItems);
+              if (existingItemIndex !== -1) {
+                newItems = [...prevItems];
+                newItems[existingItemIndex] = {
+                  ...newItems[existingItemIndex],
+                  quantity: newItems[existingItemIndex].quantity + 1,
+                };
+              } else {
+                newItems = [
+                  ...prevItems,
+                  {
+                    productId: product._id,
+                    price: product.price,
+                    quantity: 1,
+                    name: product.name,
+                    image: product.images[0] || "",
+                  },
+                ];
               }
 
               resolve();
@@ -145,12 +223,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
           3000,
           "Add to cart operation timed out"
         );
+
+        await syncCartToDB(newItems);
       } catch (error) {
         console.error("Failed to add to cart:", error);
         setError("Failed to add item to cart");
       }
     },
-    [user]
+    [syncCartToDB]
   );
 
   const removeFromCart = useCallback(
@@ -159,17 +239,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
         await withTimeout(
           new Promise<void>((resolve) => {
             setCartItems((prevItems) => {
-              resolve();
               const newItems = prevItems.filter(
                 (item) => item.productId !== productId
               );
 
-              // ✅ only sync to DB if logged in
-              if (user) {
-                syncCartToDB(newItems);
-              }
+              (async () => {
+                await syncCartToDB(newItems);
+                resolve();
+              })();
 
-              resolve();
               return newItems;
             });
           }),
@@ -178,48 +256,55 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       } catch (error) {
         console.error("Failed to remove from cart:", error);
+        setError("Failed to remove item from cart");
       }
     },
-    [user]
+    [syncCartToDB]
   );
 
   const updateQuantity = useCallback(
-    async (productId: string, quantity: number): Promise<void> => {
+    async (productId: string, quantity: number) => {
       if (quantity <= 0) {
         await removeFromCart(productId);
         return;
       }
 
-      return new Promise<void>((resolve) => {
+      await new Promise<void>((resolve) => {
         setCartItems((prevItems) => {
-          resolve();
           const newItems = prevItems.map((item) =>
             item.productId === productId ? { ...item, quantity } : item
           );
 
-          // ✅ only sync to DB if logged in
-          if (user) {
-            syncCartToDB(newItems);
-          }
+          (async () => {
+            await syncCartToDB(newItems);
+            resolve();
+          })();
 
-          resolve();
           return newItems;
         });
       });
     },
-    [removeFromCart, user]
+    [removeFromCart, syncCartToDB]
   );
 
   const clearCart = useCallback(async () => {
-    return new Promise<void>((resolve) => {
+    try {
       setCartItems([]);
+      localStorage.removeItem("cart");
 
-      // ✅ only sync to DB if logged in
       if (user) {
-        syncCartToDB([]);
+        await fetch("/api/cart/clear", {
+          method: "DELETE",
+        });
       }
-      resolve();
-    });
+      toast({
+        title: "Success",
+        description: `Cart cleared`,
+      });
+    } catch (error) {
+      console.error("Failed to clear cart:", error);
+      setError("Failed to clear cart");
+    }
   }, [user]);
 
   const cartTotal = useMemo(
@@ -231,23 +316,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const cartCount = useMemo(
     () => cartItems.reduce((count, item) => count + item.quantity, 0),
     [cartItems]
-  );
-
-  const syncCartToDB = useCallback(
-    async (items: CartItem[]) => {
-      if (user) {
-        try {
-          await fetch("/api/cart/save", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cartItems: items }),
-          });
-        } catch (err) {
-          console.error("Failed to sync cart to DB:", err);
-        }
-      }
-    },
-    [user]
   );
 
   return (
@@ -262,6 +330,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         cartTotal,
         cartCount,
+        syncCartToDB,
       }}
     >
       {children}
