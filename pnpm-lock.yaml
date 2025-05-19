@@ -231,6 +231,9 @@ importers:
       mongodb-memory-server:
         specifier: ^10.1.4
         version: 10.1.4
+      monnify-js:
+        specifier: ^1.0.2
+        version: 1.0.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       node-mocks-http:
         specifier: ^1.17.0
         version: 1.17.0(@types/node@20.17.29)
@@ -4278,6 +4281,12 @@ packages:
   mongoose@8.13.2:
     resolution: {integrity: sha512-riCBqZmNkYBWjXpM3qWLDQw7QmTKsVZDPhLXFJqC87+OjocEVpvS3dA2BPPUiLAu+m0/QmEj5pSXKhH+/DgerQ==}
     engines: {node: '>=16.20.1'}
+
+  monnify-js@1.0.2:
+    resolution: {integrity: sha512-6lhAAG/64nZqTq4mUFQqYT7uRBs7gQ1p4RCKjX7liPNP9dHzkmsLwaZUvgOIFgmKjUQpGcqSM3vDEfR3EHgkSw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   motion-dom@12.6.3:
     resolution: {integrity: sha512-gRY08RjcnzgFYLemUZ1lo/e9RkBxR+6d4BRvoeZDSeArG4XQXERSPapKl3LNQRu22Sndjf1h+iavgY0O4NrYqA==}
@@ -10243,6 +10252,11 @@ snapshots:
       - snappy
       - socks
       - supports-color
+
+  monnify-js@1.0.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   motion-dom@12.6.3:
     dependencies:

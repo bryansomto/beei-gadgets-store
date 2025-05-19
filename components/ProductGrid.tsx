@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/formatPrice";
-import { Star, ImageOff, ArrowRight } from "lucide-react";
-import { FaCartPlus, FaHeart } from "react-icons/fa";
+import { Star, ImageOff, ArrowRight, Heart } from "lucide-react";
+import { FaCartPlus } from "react-icons/fa";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -19,24 +19,8 @@ import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  images: string[];
-  price: number;
-  category: {
-    _id: string;
-    name: string;
-  };
-  properties: Record<string, string>;
-  rating?: number;
-  reviews?: number;
-  stock?: number;
-  isNew?: boolean;
-  discount?: number;
-}
+import { useWishlist } from "@/context/WishlistContext";
+import { Product } from "@/types";
 
 interface ProductGridProps {
   title: string;
@@ -56,6 +40,8 @@ export default function ProductGrid({
   const [loading, setLoading] = useState(!initialProducts.length);
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -91,6 +77,21 @@ export default function ProductGrid({
       setLoading(false);
     }
   }, [limit, category]);
+
+  const handleWishlistClick = async (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsProcessing(true);
+    try {
+      if (isInWishlist(product._id)) {
+        await removeFromWishlist(product._id);
+      } else {
+        await addToWishlist(product._id);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (error) {
     return (
@@ -210,6 +211,26 @@ export default function ProductGrid({
                             </Badge>
                           )}
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2"
+                          onClick={(e) => handleWishlistClick(e, product)}
+                          disabled={isProcessing}
+                          aria-label={
+                            isInWishlist(product._id)
+                              ? "Remove from wishlist"
+                              : "Add to wishlist"
+                          }
+                        >
+                          <Heart
+                            className={`h-5 w-5 ${
+                              isInWishlist(product._id)
+                                ? "fill-red-500 text-red-500"
+                                : ""
+                            }`}
+                          />
+                        </Button>
                       </div>
 
                       <div className="p-6 flex flex-col">
@@ -254,7 +275,7 @@ export default function ProductGrid({
                           </div>
                           <Button
                             size="lg"
-                            className="gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
+                            className="gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-zinc-200"
                             onClick={(e) => {
                               e.preventDefault();
                               addToCart(product);
@@ -296,7 +317,7 @@ export default function ProductGrid({
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-zinc-600">
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-100">
                         <ImageOff className="h-8 w-8" />
                       </div>
                     )}
@@ -315,15 +336,26 @@ export default function ProductGrid({
                         </Badge>
                       )}
                     </div>
-                    <button
-                      className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-red-500 hover:text-white transition-colors dark:bg-zinc-700/80"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // Add to wishlist
-                      }}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => handleWishlistClick(e, product)}
+                      disabled={isProcessing}
+                      aria-label={
+                        isInWishlist(product._id)
+                          ? "Remove from wishlist"
+                          : "Add to wishlist"
+                      }
                     >
-                      <FaHeart className="h-4 w-4" />
-                    </button>
+                      <Heart
+                        className={`h-5 w-5 ${
+                          isInWishlist(product._id)
+                            ? "fill-red-500 text-red-500"
+                            : ""
+                        }`}
+                      />
+                    </Button>
                   </div>
 
                   <div className="p-4 flex flex-col flex-1">
@@ -333,7 +365,8 @@ export default function ProductGrid({
                       </h3>
                       {product.category && (
                         <span className="text-xs text-muted-foreground">
-                          {product.category.name}
+                          {typeof product.category === "object" &&
+                            product.category.name}
                         </span>
                       )}
                     </div>
@@ -359,7 +392,7 @@ export default function ProductGrid({
                       </div>
                       <Button
                         size="sm"
-                        className="w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
+                        className="w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                         onClick={(e) => {
                           e.preventDefault();
                           addToCart(product);

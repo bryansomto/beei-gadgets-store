@@ -21,7 +21,7 @@ const addressSchema = z.object({
   name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
   streetAddress: z.string().min(1, "Street address is required"),
-  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
   postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
 });
@@ -117,7 +117,11 @@ export default function CheckoutPage() {
     clearCart,
     isLoading: isCartLoading,
   } = useCart();
-  const { user } = useUser();
+  const {
+    user,
+    loading: isUserLoading,
+    authenticated: isAuthenticated,
+  } = useUser();
   const router = useRouter();
 
   const {
@@ -126,13 +130,14 @@ export default function CheckoutPage() {
     formState: { errors, isSubmitting },
     setValue,
     reset,
+    trigger,
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
       name: "",
       email: "",
       streetAddress: "",
-      city: "",
+      state: "",
       postalCode: "",
       country: "",
     },
@@ -140,30 +145,41 @@ export default function CheckoutPage() {
 
   const [isAddressLoading, setIsAddressLoading] = useState(true);
 
-  // Initialize form with user data
+  // Redirect if not authenticated
   useEffect(() => {
-    if (user) {
-      setValue(
-        "name",
-        [user.firstName, user.lastName].filter(Boolean).join(" ")
-      );
-      setValue("email", user.email || "");
+    if (!isUserLoading && !isAuthenticated) {
+      router.push("/login?redirect=/checkout");
     }
-  }, [user, setValue]);
+  }, [isUserLoading, isAuthenticated, router]);
 
-  // Load saved address
   useEffect(() => {
-    if (!user?.email) {
-      setIsAddressLoading(false);
-      return;
-    }
+    const initializeForm = async () => {
+      if (!user?.email) return;
 
-    const fetchAddress = async () => {
       try {
-        const { data } = await axios.get<AddressFormData>("/api/address");
-        if (data) {
-          reset(data); // Reset form with saved address data
-        }
+        // Fetch existing address (if any)
+        const { data: addressData } = await axios.get<AddressFormData>(
+          "/api/address",
+          {
+            params: { userEmail: user.email },
+          }
+        );
+
+        const fullName = [user.firstName, user.lastName]
+          .filter(Boolean)
+          .join(" ");
+
+        // Combine fetched address and fallback to user info
+        const initialValues: AddressFormData = {
+          name: addressData?.name || fullName || "",
+          email: addressData?.email || user.email || "",
+          streetAddress: addressData?.streetAddress || "",
+          state: addressData?.state || "",
+          postalCode: addressData?.postalCode || "",
+          country: addressData?.country || "",
+        };
+
+        reset(initialValues); // ✅ Reset handles all fields at once
       } catch (err) {
         console.error("Failed to load address:", err);
       } finally {
@@ -171,20 +187,25 @@ export default function CheckoutPage() {
       }
     };
 
-    fetchAddress();
+    initializeForm();
   }, [user, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!user?.email) {
+      toast.error("Please sign in to complete your order");
+      return;
+    }
+
     try {
       // Save address
       await axios.post("/api/address", {
-        userEmail: user?.email,
+        userEmail: user.email,
         ...data,
       });
 
       // Create order
       const { data: order } = await axios.post("/api/orders", {
-        userEmail: user?.email,
+        userEmail: user.email,
         items: cartItems,
         total: cartTotal,
         address: data,
@@ -194,17 +215,15 @@ export default function CheckoutPage() {
       await clearCart();
 
       // Redirect to confirmation
-      router.push(`/order/${order._id}`);
+      // router.push(`/order/${order._id}`);
       toast.success("Order placed successfully!");
     } catch (err) {
       console.error("Checkout failed:", err);
-      if (axios.isAxiosError(err)) {
-        toast.error(
-          err.response?.data?.message || "Failed to complete checkout"
-        );
-      } else {
-        toast.error("Failed to complete checkout");
-      }
+      toast.error(
+        axios.isAxiosError(err)
+          ? err.response?.data?.message || "Failed to complete checkout"
+          : "Failed to complete checkout"
+      );
     }
   });
 
@@ -288,16 +307,16 @@ export default function CheckoutPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="state">State</Label>
                 <Controller
-                  name="city"
+                  name="state"
                   control={control}
                   render={({ field }) => (
                     <>
-                      <Input id="city" {...field} required />
-                      {errors.city && (
+                      <Input id="state" {...field} required />
+                      {errors.state && (
                         <p className="text-sm text-red-500">
-                          {errors.city.message}
+                          {errors.state.message}
                         </p>
                       )}
                     </>

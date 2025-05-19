@@ -9,7 +9,7 @@ export interface IUser extends Document {
   updatedAt: Date
 }
 
-const UserSchema: Schema<IUser> = new Schema(
+const UserSchema = new Schema<IUser>(
   {
     email: {
       type: String,
@@ -31,8 +31,15 @@ const UserSchema: Schema<IUser> = new Schema(
   },
   {
     timestamps: true, // adds createdAt and updatedAt fields
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret._id = ret._id.toString();
+        delete ret.password;
+        return ret;
+      },
+    }
   }
 )
 
-export const User: Model<IUser> =
-  mongoose.models.User || mongoose.model<IUser>('User', UserSchema)
+export const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

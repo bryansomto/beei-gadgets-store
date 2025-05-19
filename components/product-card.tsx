@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-          {product.stock <= 0 && (
+          {product.stock !== undefined && product.stock <= 0 && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <span className="text-white font-medium bg-red-500 px-2 py-1 rounded text-sm">
                 Out of Stock
@@ -74,9 +74,10 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-4 pt-0">
         <Button
-          className="w-full"
-          disabled={product.stock <= 0 || isLoading || isAdding}
+          className="w-full dark:text-gray-100"
+          disabled={(product.stock ?? 0) <= 0 || isLoading || isAdding}
           onClick={handleAddToCart}
+          aria-label="Add to cart"
         >
           {isAdding ? "Adding..." : "Add to Cart"}
         </Button>

@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Cart } from "@/models/Cart";
 import { CartItem } from "@/models/CartItem";
-import Product from "@/models/Product";
+import { Product } from "@/models/Product";
 import { NextRequest, NextResponse } from "next/server";
 
 type GuestItem = {

@@ -11,10 +11,12 @@ import { buttonVariants } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useCart } from "@/context/CartContext";
 import { ModeToggle } from "./ModeToggle";
+import { useWishlist } from "@/context/WishlistContext";
 
 const Navbar = () => {
   const { user, isAdmin, image, initials, loading } = useUser();
   const { cartCount, clearCart, cartItems, syncCartToDB } = useCart();
+  const { getWishlistCount } = useWishlist();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -119,6 +121,18 @@ const Navbar = () => {
                         className="block text-sm text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 py-1 rounded"
                       >
                         My Account
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        onClick={toggleMenu}
+                        className="flex items-center py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors gap-1"
+                      >
+                        Wishlist
+                        {getWishlistCount() > 0 && (
+                          <span className="bg-green-600 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center text-white">
+                            {getWishlistCount()}
+                          </span>
+                        )}
                       </Link>
                       {isAdmin && (
                         <Link
@@ -234,16 +248,27 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            <Link
-              href="/account"
-              onClick={toggleMenu}
-              className="block py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
-            >
-              My Account
-            </Link>
-
             {user && (
               <div className="pt-2 border-t border-gray-300 dark:border-zinc-700">
+                <Link
+                  href="/account"
+                  onClick={toggleMenu}
+                  className="block py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
+                >
+                  My Account
+                </Link>
+                <Link
+                  href="/wishlist"
+                  onClick={toggleMenu}
+                  className="flex items-center py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors gap-1"
+                >
+                  Wishlist
+                  {getWishlistCount() > 0 && (
+                    <span className="bg-green-600 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center text-white">
+                      {getWishlistCount()}
+                    </span>
+                  )}
+                </Link>
                 {isAdmin && (
                   <Link
                     href="/admin"

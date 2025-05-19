@@ -4,7 +4,8 @@ export default function useUser() {
   const { data: session, status } = useSession()
   const user = session?.user
   return {
-    user,
+    session,
+    user: session?.user,
     isAdmin: user?.isAdmin ?? false,
     image: user?.image || "",
     initials: user?.initials || "",

@@ -1,20 +1,21 @@
 import { notFound } from "next/navigation";
 import ProductPageClient from "./ProductPageClient";
+import { Product } from "@/types";
 
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  images: string[];
-  price: number;
-  category: { _id: string; name: string };
-  properties: Record<string, string>;
-  rating: number;
-  reviews: number;
-  stock: number;
-  createdAt: string;
-  updatedAt: string;
-}
+// interface Product {
+//   _id: string;
+//   name: string;
+//   description: string;
+//   images: string[];
+//   price: number;
+//   category: { _id: string; name: string };
+//   properties: Record<string, string>;
+//   rating: number;
+//   reviews: number;
+//   stock: number;
+//   createdAt: string;
+//   updatedAt: string;
+// }
 
 export const dynamicParams = true;
 export const revalidate = 3600;
@@ -39,7 +40,8 @@ export async function generateStaticParams() {
       next: { tags: ["products"] },
     });
     if (!res.ok) return [];
-    const products = await res.json();
+    const data = await res.json();
+    const products = Array.isArray(data) ? data : data.products || [];
     return products.map((product: Product) => ({ id: product._id }));
   } catch (error) {
     console.error("Failed to generate static params:", error);

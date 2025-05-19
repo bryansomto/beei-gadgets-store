@@ -8,25 +8,31 @@ import { FaCartPlus, FaShareAlt } from "react-icons/fa";
 import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
 import RelatedProducts from "@/components/RelatedProducts";
-
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  images: string[];
-  price: number;
-  category: { _id: string; name: string };
-  properties: Record<string, string>;
-  rating: number;
-  reviews: number;
-  stock: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useCart } from "@/context/CartContext";
+import { Product } from "@/types";
 
 export default function ProductPageClient({ product }: { product: Product }) {
+  const { addToCart, isLoading } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+
+  const categoryId =
+    typeof product.category === "string"
+      ? product.category
+      : product.category._id;
+
+  const handleAddToCart = async () => {
+    setIsAdding(true);
+    try {
+      await addToCart(product);
+      // Show success feedback
+    } catch (error) {
+      // Show error feedback
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   const handleThumbnailClick = useCallback((index: number) => {
     setCurrentImage(index);
@@ -79,7 +85,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              {product.stock <= 0 && (
+              {product.stock !== undefined && product.stock <= 0 && (
                 <div
                   className="absolute inset-0 bg-black/50 flex items-center justify-center"
                   aria-label="Out of stock indicator"
@@ -175,12 +181,12 @@ export default function ProductPageClient({ product }: { product: Product }) {
               </p>
               <p
                 className={`text-sm ${
-                  product.stock > 0
+                  product.stock !== undefined && product.stock > 0
                     ? "text-green-600 dark:text-green-500"
                     : "text-red-600 dark:text-red-500"
                 }`}
               >
-                {product.stock > 0
+                {product.stock !== undefined && product.stock > 0
                   ? `In stock (${product.stock} available)`
                   : "Out of stock"}
               </p>
@@ -228,7 +234,12 @@ export default function ProductPageClient({ product }: { product: Product }) {
               <Button
                 size="lg"
                 className="flex-1 gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
-                disabled={product.stock <= 0}
+                disabled={
+                  (product.stock !== undefined && product.stock <= 0) ||
+                  isLoading ||
+                  isAdding
+                }
+                onClick={handleAddToCart}
                 aria-label="Add to cart"
               >
                 <FaCartPlus className="h-5 w-5" />
@@ -250,15 +261,9 @@ export default function ProductPageClient({ product }: { product: Product }) {
 
       {/* Related Products Section */}
       <section className="mt-16" aria-labelledby="related-products-heading">
-        <h2
-          id="related-products-heading"
-          className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100"
-        >
-          You may also like
-        </h2>
         <RelatedProducts
           currentProductId={product._id}
-          categoryId={product.category._id}
+          categoryId={categoryId}
         />
       </section>
     </div>

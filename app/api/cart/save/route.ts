@@ -2,9 +2,9 @@ import { auth } from "@/auth";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Cart } from "@/models/Cart";
 import { CartItem } from "@/models/CartItem";
-import Product from "@/models/Product";
 import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
+import { Product } from "@/models/Product";
 
 interface FrontendCartItem {
   productId: string;

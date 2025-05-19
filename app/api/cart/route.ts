@@ -3,9 +3,8 @@ import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { Cart } from "@/models/Cart";
 import { mongooseConnect } from "@/lib/mongoose";
-import { Types, FlattenMaps } from "mongoose";
+import { Types } from "mongoose";
 import { ICartItem } from "@/models/CartItem";
-import { CartApiResponse } from "@/types/cart";
 
 interface IProduct {
   _id: Types.ObjectId;

@@ -7,6 +7,7 @@ import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from "../context/CartContext";
 import ThemeProvider from "@/components/theme-provider";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,10 +42,12 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <CartProvider>
-              <Navbar />
-              {children}
-              <Footer />
-              <Toaster />
+              <WishlistProvider>
+                <Navbar />
+                {children}
+                <Footer />
+                <Toaster />
+              </WishlistProvider>
             </CartProvider>
           </ThemeProvider>
         </body>

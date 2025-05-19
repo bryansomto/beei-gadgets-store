@@ -18,9 +18,13 @@ export interface Category {
     properties: Record<string, string>;
     rating: number;
     reviews: number;
-    stock: number;
+    stock?: number;
+    isNew?: boolean;
+    discount?: number;
     createdAt: string;
     updatedAt: string;
   }
+
+  
 
   export type SortOption = "newest" | "price-low-to-high" | "price-high-to-low" | "popular";
