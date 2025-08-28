@@ -5,6 +5,11 @@ export interface IUser extends Document {
   password: string
   firstName?: string
   lastName?: string
+  phoneNumber?: string;
+  image?: string;
+  initials?: string;
+  isAdmin: boolean;
+  emailVerified?: Date;
   createdAt: Date
   updatedAt: Date
 }
@@ -27,6 +32,22 @@ const UserSchema = new Schema<IUser>(
     },
     lastName: {
       type: String,
+    },
+    phoneNumber: { 
+      type: String,
+      default: "",
+      trim: true,
+    },
+     initials: { 
+      type: String, 
+      trim: true,
+    },
+    isAdmin: { 
+      type: Boolean, 
+      default: false,
+    },
+    emailVerified: { 
+      type: Date,
     },
   },
   {

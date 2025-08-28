@@ -71,7 +71,6 @@ export function AdminsPage({ swal }: AdminsPageProps) {
       // Handle both response formats
       const admins = Array.isArray(data) ? data : data?.admins || [];
       setAdminEmails(admins);
-      console.log("Loaded admins:", admins);
     } catch (error) {
       console.error("Failed to load admins", error);
       toast({

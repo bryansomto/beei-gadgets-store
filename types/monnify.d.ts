@@ -1,6 +1,5 @@
-// types/monnify-js/index.d.ts
 declare module 'monnify-js' {
-  interface MonnifyPaymentOptions {
+  interface PaymentOptions {
     amount: number;
     currency: string;
     reference: string;
@@ -11,19 +10,11 @@ declare module 'monnify-js' {
     redirectUrl: string;
     onComplete?: (response: any) => void;
     onClose?: (data: any) => void;
-    onLoadStart?: () => void;
-    onLoadComplete?: () => void;
-  }
-
-  interface MonnifyPaymentResponse {
-    checkoutUrl: string;
-    transactionReference: string;
-    paymentReference: string;
   }
 
   class Monnify {
     constructor(apiKey: string, contractCode: string);
-    initiatePayment(options: MonnifyPaymentOptions): Promise<MonnifyPaymentResponse>;
+    initializePayment(options: PaymentOptions): Promise<{ checkoutUrl: string }>;
   }
 
   export = Monnify;

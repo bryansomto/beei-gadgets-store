@@ -25,23 +25,42 @@ export default async function verifyUser(
 ): Promise<VerifyUserResult | null> {
     await mongooseConnect()
 
-    type UserType = InferSchemaType<typeof User.schema> & { _id: string, isAdmin: boolean, image: string, initials: string };
+    type UserType = InferSchemaType<typeof User.schema> & { 
+      _id: string, 
+      isAdmin: boolean, 
+      image: string, 
+      initials: string 
+    };
+    
     const user: UserType | null = await User.findOne({ email });
 
     if (!user || !user.password) {
         return null
     }
 
-    const id = user._id.toString() // ensure id is a string
-
-    const initials = await getInitials(user.firstName || "", user.lastName || "")
-
-    const isValidPassword = await verifyPassword(password, user.password)
+    const id = user._id.toString()
+    const initials = await getInitials(
+      user.firstName as string || "", 
+      user.lastName as string || ""
+    )
+    const isValidPassword = await verifyPassword(
+      password, 
+      user.password as string || ""
+    )
 
     if (!isValidPassword) {
         return null
     }
-    const isAdmin = await isUserAdmin(user.email)
+    
+    const isAdmin = await isUserAdmin(user.email as string)
 
-    return { id, email: user.email, firstName: user.firstName || "", lastName: user.lastName || "", isAdmin, image: user.image || "", initials } // return the user object
+    return { 
+      id, 
+      email: user.email as string, 
+      firstName: user.firstName as string || "", 
+      lastName: user.lastName as string || "", 
+      isAdmin, 
+      image: user.image as string || "", 
+      initials 
+    }
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
+import { Loader2, Phone, CreditCard, Banknote } from "lucide-react";
 import { toast } from "react-hot-toast";
 import useUser from "@/lib/userSession";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,14 +12,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { phoneSchema } from "@/lib/phoneSchema";
+import { formatPrice } from "@/lib/formatPrice";
 
 // Define your form schema
 const addressSchema = z.object({
   name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
+  phoneNumber: phoneSchema,
   streetAddress: z.string().min(1, "Street address is required"),
   state: z.string().min(1, "State is required"),
   postalCode: z.string().min(1, "Postal code is required"),
@@ -34,6 +38,8 @@ interface CartItem {
   quantity: number;
   price: number;
 }
+
+type PaymentMethod = "debit_card" | "bank_transfer" | "call_rep";
 
 const CheckoutSkeleton = () => (
   <div className="max-w-4xl mx-auto p-4">
@@ -96,19 +102,26 @@ const OrderSummary = ({
             </p>
           </div>
           <div className="font-medium">
-            ${(item.price * item.quantity).toFixed(2)}
+            {formatPrice((item.price * item.quantity).toFixed(2))}
           </div>
         </div>
       ))}
       <div className="pt-4 border-t">
         <div className="flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span>${cartTotal.toFixed(2)}</span>
+          <span>{formatPrice(cartTotal.toFixed(2))}</span>
         </div>
       </div>
     </CardContent>
   </Card>
 );
+
+// Check if current time is within work hours (9 AM to 5 PM)
+const isWithinWorkHours = () => {
+  const now = new Date();
+  const hours = now.getHours();
+  return hours >= 9 && hours < 17;
+};
 
 export default function CheckoutPage() {
   const {
@@ -123,6 +136,9 @@ export default function CheckoutPage() {
     authenticated: isAuthenticated,
   } = useUser();
   const router = useRouter();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethod | null>(null);
+  const [isWorkHours, setIsWorkHours] = useState(false);
 
   const {
     control,
@@ -136,6 +152,7 @@ export default function CheckoutPage() {
     defaultValues: {
       name: "",
       email: "",
+      phoneNumber: "",
       streetAddress: "",
       state: "",
       postalCode: "",
@@ -144,6 +161,11 @@ export default function CheckoutPage() {
   });
 
   const [isAddressLoading, setIsAddressLoading] = useState(true);
+
+  // Check work hours on component mount
+  useEffect(() => {
+    setIsWorkHours(isWithinWorkHours());
+  }, []);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -173,13 +195,14 @@ export default function CheckoutPage() {
         const initialValues: AddressFormData = {
           name: addressData?.name || fullName || "",
           email: addressData?.email || user.email || "",
+          phoneNumber: addressData?.phoneNumber || "",
           streetAddress: addressData?.streetAddress || "",
           state: addressData?.state || "",
           postalCode: addressData?.postalCode || "",
           country: addressData?.country || "",
         };
 
-        reset(initialValues); // ✅ Reset handles all fields at once
+        reset(initialValues);
       } catch (err) {
         console.error("Failed to load address:", err);
       } finally {
@@ -190,7 +213,14 @@ export default function CheckoutPage() {
     initializeForm();
   }, [user, reset]);
 
-  const onSubmit = handleSubmit(async (data) => {
+  const handlePaymentMethodSelect = (method: PaymentMethod) => {
+    setSelectedPaymentMethod(method);
+  };
+
+  const processOrder = async (
+    paymentMethod: PaymentMethod,
+    data: AddressFormData
+  ) => {
     if (!user?.email) {
       toast.error("Please sign in to complete your order");
       return;
@@ -203,20 +233,30 @@ export default function CheckoutPage() {
         ...data,
       });
 
-      // Create order
-      const { data: order } = await axios.post("/api/orders", {
+      // Create order with payment method
+      const { data: order } = await axios.post("/api/checkout", {
         userEmail: user.email,
+        userName: data.name,
         items: cartItems,
         total: cartTotal,
         address: data,
+        paymentMethod,
       });
 
       // Clear cart
       await clearCart();
 
-      // Redirect to confirmation
-      // router.push(`/order/${order._id}`);
-      toast.success("Order placed successfully!");
+      // Redirect based on payment method
+      if (paymentMethod === "debit_card") {
+        router.push(`/payment/debit-card/${order._id}`);
+      } else if (paymentMethod === "bank_transfer") {
+        router.push(`/payment/bank-transfer/${order._id}`);
+      } else {
+        router.push(`/order/confirmation/${order._id}`);
+        toast.success(
+          "Order placed successfully! Our representative will call you shortly."
+        );
+      }
     } catch (err) {
       console.error("Checkout failed:", err);
       toast.error(
@@ -225,6 +265,15 @@ export default function CheckoutPage() {
           : "Failed to complete checkout"
       );
     }
+  };
+
+  const onSubmit = handleSubmit(async (data) => {
+    if (!selectedPaymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+
+    await processOrder(selectedPaymentMethod, data);
   });
 
   if (isCartLoading || isAddressLoading) {
@@ -280,6 +329,24 @@ export default function CheckoutPage() {
                     {errors.email && (
                       <p className="text-sm text-red-500">
                         {errors.email.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone number</Label>
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <Input id="phoneNumber" {...field} required />
+                    {errors.phoneNumber && (
+                      <p className="text-sm text-red-500">
+                        {errors.phoneNumber.message}
                       </p>
                     )}
                   </>
@@ -360,20 +427,127 @@ export default function CheckoutPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full mt-4"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Place Order"
+            {/* Payment Method Selection */}
+            <div className="space-y-4 pt-6 border-t">
+              <h3 className="text-lg font-semibold">Payment Method</h3>
+
+              <RadioGroup
+                value={selectedPaymentMethod || ""}
+                onValueChange={(value) =>
+                  handlePaymentMethodSelect(value as PaymentMethod)
+                }
+                className="space-y-3"
+              >
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent">
+                  <RadioGroupItem value="debit_card" id="debit_card" />
+                  <Label
+                    htmlFor="debit_card"
+                    className="flex items-center space-x-2 cursor-pointer flex-1"
+                  >
+                    <CreditCard className="h-5 w-5" />
+                    <span>Pay with Debit Card</span>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent">
+                  <RadioGroupItem value="bank_transfer" id="bank_transfer" />
+                  <Label
+                    htmlFor="bank_transfer"
+                    className="flex items-center space-x-2 cursor-pointer flex-1"
+                  >
+                    <Banknote className="h-5 w-5" />
+                    <span>Bank Transfer</span>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent">
+                  <RadioGroupItem
+                    value="call_rep"
+                    id="call_rep"
+                    disabled={!isWorkHours}
+                  />
+                  <Label
+                    htmlFor="call_rep"
+                    className={`flex items-center space-x-2 cursor-pointer flex-1 ${
+                      !isWorkHours ? "opacity-50" : ""
+                    }`}
+                  >
+                    <Phone className="h-5 w-5" />
+                    <div>
+                      <span>Call to Place Order</span>
+                      {!isWorkHours && (
+                        <p className="text-sm text-muted-foreground">
+                          Available 9 AM - 5 PM
+                        </p>
+                      )}
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Payment Method Buttons */}
+            <div className="space-y-3 pt-4">
+              {selectedPaymentMethod === "debit_card" && (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4" />
+                      Pay with Debit Card
+                    </>
+                  )}
+                </Button>
               )}
-            </Button>
+
+              {selectedPaymentMethod === "bank_transfer" && (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Banknote className="h-4 w-4" />
+                      Proceed to Bank Transfer
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {selectedPaymentMethod === "call_rep" && (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !isWorkHours}
+                  className="w-full gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Phone className="h-4 w-4" />
+                      Request Call Back
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </form>
         </div>
 

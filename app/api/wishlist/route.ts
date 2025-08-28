@@ -13,8 +13,6 @@ export async function GET(req: Request) {
   try {
     await mongooseConnect();
     const session = await auth();
-
-    console.log("Session:", session);
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,8 +22,6 @@ export async function GET(req: Request) {
       .populate<{ products: typeof Product.schema.obj[] }>("products")
       .lean()
       .exec();
-
-    console.log("Fetched wishlist:", wishlist);
 
     if (!wishlist) {
       return NextResponse.json([], { status: 200 });
