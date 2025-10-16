@@ -137,10 +137,10 @@ export default function ProductGrid({
 
   return (
     <section className="px-4 py-8 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           {title}
-          <span className="ml-2 text-muted-foreground text-sm font-normal">
+          <span className="hidden ml-2 text-muted-foreground text-sm font-normal">
             ({products.length} products)
           </span>
         </h2>
@@ -151,6 +151,13 @@ export default function ProductGrid({
         >
           View all <ArrowRight className="h-4 w-4" />
         </Link>
+      </div>
+
+      <div className="relative w-full mb-6" aria-hidden="true">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+        </div>
+        <div className="relative flex justify-center text-sm"></div>
       </div>
 
       {title === "New arrivals" ? (
@@ -169,8 +176,8 @@ export default function ProductGrid({
             loop
             breakpoints={{
               768: { slidesPerView: 1.5 },
-              1024: { slidesPerView: 2.5 },
-              1280: { slidesPerView: 3 },
+              1280: { slidesPerView: 2 },
+              // 1440: { slidesPerView: 3 },
             }}
             className="!pb-12"
           >
@@ -184,9 +191,9 @@ export default function ProductGrid({
                   <Card className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full dark:bg-zinc-900 dark:border-zinc-800">
                     <Link
                       href={`/products/${product._id}`}
-                      className="grid grid-cols-1 md:grid-cols-2 h-full"
+                      className="grid grid-cols-1 md:grid-cols-3 h-full"
                     >
-                      <div className="relative aspect-square bg-gray-50 dark:bg-zinc-800">
+                      <div className="relative md:col-span-1 aspect-square bg-gray-50 dark:bg-zinc-800">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
@@ -233,7 +240,7 @@ export default function ProductGrid({
                         </Button>
                       </div>
 
-                      <div className="p-6 flex flex-col">
+                      <div className="p-6 flex flex-col md:col-span-2">
                         <div className="flex-1">
                           <h3 className="font-semibold text-md mb-2 line-clamp-2 text-gray-900 dark:text-gray-100">
                             {product.name}
@@ -283,7 +290,7 @@ export default function ProductGrid({
                             disabled={isLoading || isAdding}
                           >
                             <FaCartPlus className="h-4 w-4" />
-                            Add to Cart
+                            {/* Add to Cart */}
                           </Button>
                         </div>
                       </div>
@@ -360,7 +367,7 @@ export default function ProductGrid({
 
                   <div className="p-4 flex flex-col flex-1">
                     <div className="mb-2">
-                      <h3 className="font-medium text-sm sm:text-base line-clamp-2 text-gray-900 dark:text-gray-100">
+                      <h3 className="font-medium text-xs sm:text-sm lg:text-base line-clamp-2 text-gray-900 dark:text-gray-100">
                         {product.name}
                       </h3>
                       {product.category && (
@@ -392,7 +399,7 @@ export default function ProductGrid({
                       </div>
                       <Button
                         size="sm"
-                        className="w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+                        className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                         onClick={(e) => {
                           e.preventDefault();
                           addToCart(product);

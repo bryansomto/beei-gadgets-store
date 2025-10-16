@@ -159,7 +159,7 @@ export default function Home() {
       </div>
 
       {/* value proposition section */}
-      <section className="bg-slate-100 dark:bg-zinc-950">
+      <section className="bg-slate-100 dark:bg-zinc-950 pb-10">
         <MaxWidthWrapper className="flex flex-col items-center gap-16 md:gap-24">
           <div className="flex flex-col lg:flex-row items-center gap-4 sm:gap-6">
             <h2 className="order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900 dark:text-gray-100">

@@ -22,6 +22,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { passwordSchema } from "@/lib/passwordSchema";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 // Create a schema for the form
 const resetPasswordSchema = z
@@ -102,9 +103,9 @@ export default function ResetPasswordPage() {
 
   if (!isValidToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          <Card className="bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700">
+          <Card className="bg-white dark:bg-zinc-800">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100">
                 Invalid Reset Link
@@ -138,7 +139,7 @@ export default function ResetPasswordPage() {
             Back to login
           </Link>
 
-          <Card className="bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700">
+          <Card className="bg-white dark:bg-zinc-950 border-0 h-full mx-auto w-full max-w-md px-2.5 md:px-20">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100">
                 Create new password

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { buttonVariants } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -38,6 +38,7 @@ export function SignInForm({
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -156,24 +157,39 @@ export function SignInForm({
             Forgot password?
           </Link>
         </div>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          disabled={isLoading}
-          className={cn(
-            "block w-full rounded-md border border-gray-300 dark:border-zinc-600 shadow-sm",
-            "focus:border-primary focus:ring-primary dark:focus:border-primary dark:focus:ring-primary",
-            "p-2 disabled:opacity-50 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100",
-            errors.password &&
-              "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
-          )}
-          placeholder="••••••••"
-          minLength={8}
-          aria-describedby="password-description"
-          aria-invalid={!!errors.password}
-          {...register("password")}
-        />
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            disabled={isLoading}
+            className={cn(
+              "block w-full rounded-md border border-gray-300 dark:border-zinc-600 shadow-sm",
+              "focus:border-primary focus:ring-primary dark:focus:border-primary dark:focus:ring-primary",
+              "p-2 disabled:opacity-50 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100",
+              errors.password &&
+                "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
+            )}
+            placeholder="••••••••"
+            minLength={8}
+            aria-describedby="password-description"
+            aria-invalid={!!errors.password}
+            {...register("password")}
+          />
+
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+
         {errors.password && (
           <p
             className="text-sm text-red-500 dark:text-red-400 mt-1"
