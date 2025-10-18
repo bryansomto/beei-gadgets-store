@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from "../context/CartContext";
 import ThemeProvider from "@/components/theme-provider";
 import { WishlistProvider } from "@/context/WishlistContext";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,10 @@ export default function RootLayout({
               <WishlistProvider>
                 <Navbar />
                 {children}
+                <Script
+                  src="https://js.paystack.co/v1/inline.js"
+                  strategy="beforeInteractive"
+                />
                 <Footer />
                 <Toaster />
               </WishlistProvider>

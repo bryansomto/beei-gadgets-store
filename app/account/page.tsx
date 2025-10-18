@@ -28,12 +28,13 @@ const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: phoneSchema,
+  phone: phoneSchema,
 });
 
 const addressSchema = z.object({
   name: z.string().min(1, "Full name is required"),
   streetAddress: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
@@ -114,7 +115,7 @@ export default function AccountPage() {
       firstName: "",
       lastName: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
     },
   });
 
@@ -128,6 +129,7 @@ export default function AccountPage() {
     defaultValues: {
       name: "",
       streetAddress: "",
+      city: "",
       state: "",
       postalCode: "",
       country: "",
@@ -154,7 +156,7 @@ export default function AccountPage() {
           firstName: profileData.firstName || "",
           lastName: profileData.lastName || "",
           email: profileData.email || user.email || "",
-          phoneNumber: profileData.phoneNumber || "",
+          phone: profileData.phone || "",
         });
       } catch (err) {
         console.error("Failed to load profile:", err);
@@ -163,7 +165,7 @@ export default function AccountPage() {
           firstName: user.firstName || "",
           lastName: user.lastName || "",
           email: user.email || "",
-          phoneNumber: user.phoneNumber || "",
+          phone: user.phone || "",
         });
       } finally {
         setIsProfileLoading(false);
@@ -195,6 +197,7 @@ export default function AccountPage() {
           resetAddress({
             name: fullName,
             streetAddress: "",
+            city: "",
             state: "",
             postalCode: "",
             country: "",
@@ -208,6 +211,7 @@ export default function AccountPage() {
         resetAddress({
           name: fullName,
           streetAddress: "",
+          city: "",
           state: "",
           postalCode: "",
           country: "",
@@ -226,7 +230,7 @@ export default function AccountPage() {
       const response = await axios.put("/api/user/profile", {
         firstName: data.firstName,
         lastName: data.lastName,
-        phoneNumber: data.phoneNumber,
+        phone: data.phone,
       });
 
       // Update the form with the returned data
@@ -367,22 +371,19 @@ export default function AccountPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="phoneNumber"
-                    className="flex items-center gap-2"
-                  >
+                  <Label htmlFor="phone" className="flex items-center gap-2">
                     <Phone className="h-4 w-4" />
                     Phone Number
                   </Label>
                   <Controller
-                    name="phoneNumber"
+                    name="phone"
                     control={profileControl}
                     render={({ field }) => (
                       <>
-                        <Input id="phoneNumber" {...field} />
-                        {profileErrors.phoneNumber && (
+                        <Input id="phone" {...field} />
+                        {profileErrors.phone && (
                           <p className="text-sm text-red-500">
-                            {profileErrors.phoneNumber.message}
+                            {profileErrors.phone.message}
                           </p>
                         )}
                       </>
@@ -472,6 +473,23 @@ export default function AccountPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="state">City</Label>
+                    <Controller
+                      name="city"
+                      control={addressControl}
+                      render={({ field }) => (
+                        <>
+                          <Input id="city" {...field} />
+                          {addressErrors.city && (
+                            <p className="text-sm text-red-500">
+                              {addressErrors.city.message}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="state">State</Label>
                     <Controller
                       name="state"
@@ -488,6 +506,9 @@ export default function AccountPage() {
                       )}
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="postalCode">Postal Code</Label>
                     <Controller
@@ -505,24 +526,23 @@ export default function AccountPage() {
                       )}
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Controller
-                    name="country"
-                    control={addressControl}
-                    render={({ field }) => (
-                      <>
-                        <Input id="country" {...field} />
-                        {addressErrors.country && (
-                          <p className="text-sm text-red-500">
-                            {addressErrors.country.message}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Controller
+                      name="country"
+                      control={addressControl}
+                      render={({ field }) => (
+                        <>
+                          <Input id="country" {...field} />
+                          {addressErrors.country && (
+                            <p className="text-sm text-red-500">
+                              {addressErrors.country.message}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <Button

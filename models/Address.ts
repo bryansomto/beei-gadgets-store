@@ -4,7 +4,7 @@ import { Schema, model, models, Document, Model } from 'mongoose';
 interface IAddress extends Document {
   userEmail: string;
   name: string;
-  phoneNumber: string;
+  phone: string;
   city: string;
   state?: string;  // Optional field
   postalCode: string;
@@ -30,13 +30,14 @@ const AddressSchema = new Schema<IAddress>({
     required: [true, 'Full name is required'],
     trim: true
   },
-  phoneNumber: { 
+  phone: { 
     type: String, 
     required: [true, 'Phone number is required'],
     trim: true
   },
   city: { 
-    type: String, 
+    type: String,
+    required: [true, 'State is required'],
     trim: true
   },
   state: { 

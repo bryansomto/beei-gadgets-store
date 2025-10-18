@@ -1,32 +1,37 @@
-import { MonnifyService } from '@/lib/services/monnify'
 import { mongooseConnect } from "@/lib/mongoose";
 import { Order } from "@/models/Order";
 import { auth } from "@/auth";
 import { NextRequest, NextResponse } from 'next/server';
 
-
 interface OrderItem {
   productId: string;
+  name: string;
   quantity: number;
   price: number;
 }
 
 interface Address {
-  street: string;
+  name: string;
+  email: string;
+  phone: string;
+  streetAddress: string;
   city: string;
   state: string;
-  zipCode: string;
+  postalCode: string;
   country: string;
 }
 
 interface CreateOrderRequest {
   userEmail: string;
   userName: string;
-  phoneNumber: string;
   items: OrderItem[];
   total: number;
   address: Address;
+  paymentMethod: "debit_card" | "bank_transfer" | "call_rep";
 }
+
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+const PAYSTACK_PUBLIC_KEY = process.env.PAYSTACK_PUBLIC_KEY;
 
 export async function GET() {
   try {
@@ -42,104 +47,148 @@ export async function GET() {
   }
 }
 
+async function initializePaystackPayment(
+  amount: number,
+  email: string,
+  name: string,
+  phone: string,
+  orderId: string,
+  paymentMethod: string
+) {
+  try {
+    // Amount in kobo (smallest unit in NGN)
+    const amountInKobo = Math.round(amount * 100);
+
+    const payload = {
+      email,
+      amount: amountInKobo,
+      metadata: {
+        orderId,
+        customerName: name,
+        customerPhone: phone,
+        paymentMethod,
+      },
+      callback_url: `${process.env.NEXT_PUBLIC_API_URL}/payment/paystack/callback`,
+    };
+
+    const response = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to initialize Paystack payment");
+    }
+
+    return data.data;
+  } catch (error: any) {
+    console.error("Paystack initialization error:", error);
+    throw new Error(error.message || "Payment initialization failed");
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
-      const session = await auth();
-      const { userEmail, userName, phoneNumber, items, total, address }: CreateOrderRequest = await req.json();
-  
-      if (!session?.user?.email || session.user.email !== userEmail) {
-        return NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 }
-        );
-      }
-  
-      if (!items?.length || total <= 0 || !address) {
-        return NextResponse.json(
-          { error: "Invalid order data" },
-          { status: 400 }
-        );
-      }
+    const session = await auth();
+    const {
+      userEmail,
+      userName,
+      items,
+      total,
+      address,
+      paymentMethod,
+    }: CreateOrderRequest = await req.json();
+
+    if (!session?.user?.email || session.user.email !== userEmail) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    if (!items?.length || total <= 0 || !address || !paymentMethod) {
+      return NextResponse.json(
+        { error: "Invalid order data" },
+        { status: 400 }
+      );
+    }
+
+    if (!PAYSTACK_SECRET_KEY) {
+      throw new Error("Paystack configuration error: Missing API key");
+    }
+
+    await mongooseConnect();
+
+    //  const mappedAddress = {
+    //   name: address.name,
+    //   email: address.email,
+    //   phone: address.phone,
+    //   street: address.streetAddress,
+    //   city: address.city,
+    //   state: address.state,
+    //   zipCode: address.postalCode,
+    //   country: address.country,
+    // };
 
     // Create Order
     const order = new Order({
       userEmail,
       userName,
-      phoneNumber,
+      items,
       total,
       address,
+      paymentMethod,
       status: "pending",
       paid: false,
-    }) as InstanceType<typeof Order>;
-
-    console.log("Order created:", order);
-
-    // Initialize Payment
-    if (!process.env.MONNIFY_API_KEY || !process.env.MONNIFY_CONTRACT_CODE) {
-      throw new Error("Payment configuration error");
-    }
-
-    function getRequiredEnvVar(name: string): string {
-      const value = process.env[name];
-      if (!value?.trim()) {
-        throw new Error(`Missing required environment variable: ${name}`);
-      }
-      return value.trim();
-    }
-
-    const monnify = (() => {
-      try {
-        return new MonnifyService({
-          apiKey: getRequiredEnvVar('MONNIFY_API_KEY'),
-          secretKey: getRequiredEnvVar('MONNIFY_SECRET_KEY'),
-          contractCode: getRequiredEnvVar('MONNIFY_CONTRACT_CODE'),
-          baseUrl: process.env.MONNIFY_BASE_URL?.trim() // Optional
-        });
-      } catch (error) {
-        console.error('Failed to initialize Monnify:', error);
-        // Handle error appropriately (e.g., disable payment functionality)
-        throw error; // or return a mock service for development
-      }
-    })();
-
-    const paymentResponse = await monnify.initializePayment({
-      amount: total,
-      customerFullName: userName,
-      customerEmail: userEmail,
-      customerPhoneNumber: phoneNumber,
-      currency: "NGN",
-      paymentReference: `order_${order._id}_${Date.now()}`,
-      paymentDescription: `Order #${order._id}`,
-      redirectUrl: `${process.env.NEXT_PUBLIC_URL}/checkout/success?orderId=${order._id}`
     });
 
-    if (!paymentResponse?.checkoutUrl) {
-      throw new Error("Failed to initialize payment");
+    await order.save();
+    console.log("Order created:", order._id);
+    console.log(order);
+
+    // Handle payment method
+    if (paymentMethod === "call_rep") {
+      // For call_rep, no payment processing needed
+      return NextResponse.json({
+        success: true,
+        orderId: order._id,
+        message: "Order created. You will be called shortly.",
+      });
     }
+
+    // Initialize Paystack payment for debit_card and bank_transfer
+    const orderId = order._id ? order._id.toString() : order.id;
+    const paystackData = await initializePaystackPayment(
+      total,
+      address.email,
+      address.name,
+      address.phone,
+      orderId,
+      paymentMethod
+    );
 
     return NextResponse.json({
       success: true,
-      paymentUrl: paymentResponse.checkoutUrl,
       orderId: order._id,
-      message: "Payment initiated successfully"
+      authorizationUrl: paystackData.authorization_url,
+      accessCode: paystackData.access_code,
+      reference: paystackData.reference,
+      message: "Payment initialized successfully",
     });
-
   } catch (error: any) {
     console.error("Checkout error:", error);
 
-    // Update order status if order was created
-    if (error.orderId) {
-      await Order.updateOne(
-        { _id: error.orderId },
-        { status: 'failed', error: error.message }
-      ).catch(e => console.error("Failed to update order status:", e));
-    }
-
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: error.message || "Checkout failed",
-        message: "Please try again or contact support"
+        message: "Please try again or contact support",
       },
       { status: 500 }
     );

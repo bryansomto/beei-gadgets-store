@@ -188,7 +188,7 @@ export default function ProductGrid({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <Card className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full dark:bg-zinc-900 dark:border-zinc-800">
+                  <Card className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full dark:bg-zinc-900 dark:border-zinc-800  md:p-2">
                     <Link
                       href={`/products/${product._id}`}
                       className="grid grid-cols-1 md:grid-cols-3 h-full"
@@ -221,7 +221,7 @@ export default function ProductGrid({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute top-2 right-2"
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-white dark:bg-zinc-800/90 dark:hover:bg-zinc-800 rounded-full shadow-md backdrop-blur-sm transition-colors"
                           onClick={(e) => handleWishlistClick(e, product)}
                           disabled={isProcessing}
                           aria-label={
@@ -231,10 +231,10 @@ export default function ProductGrid({
                           }
                         >
                           <Heart
-                            className={`h-5 w-5 ${
+                            className={`h-5 w-5 transition-colors ${
                               isInWishlist(product._id)
                                 ? "fill-red-500 text-red-500"
-                                : ""
+                                : "text-gray-600 dark:text-gray-300"
                             }`}
                           />
                         </Button>
@@ -346,7 +346,7 @@ export default function ProductGrid({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2"
+                      className="absolute top-2 right-2 bg-white/90 hover:bg-white dark:bg-zinc-800/90 dark:hover:bg-zinc-800 rounded-full shadow-md backdrop-blur-sm transition-colors"
                       onClick={(e) => handleWishlistClick(e, product)}
                       disabled={isProcessing}
                       aria-label={
@@ -356,10 +356,10 @@ export default function ProductGrid({
                       }
                     >
                       <Heart
-                        className={`h-5 w-5 ${
+                        className={`h-5 w-5 transition-colors ${
                           isInWishlist(product._id)
                             ? "fill-red-500 text-red-500"
-                            : ""
+                            : "text-gray-600 dark:text-gray-300"
                         }`}
                       />
                     </Button>

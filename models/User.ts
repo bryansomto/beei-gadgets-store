@@ -5,7 +5,7 @@ export interface IUser extends Document {
   password: string
   firstName?: string
   lastName?: string
-  phoneNumber?: string;
+  phone?: string;
   image?: string;
   initials?: string;
   isAdmin: boolean;
@@ -33,7 +33,7 @@ const UserSchema = new Schema<IUser>(
     lastName: {
       type: String,
     },
-    phoneNumber: { 
+    phone: { 
       type: String,
       default: "",
       trim: true,

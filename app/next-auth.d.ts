@@ -6,7 +6,7 @@ declare module "next-auth" {
     id: string;
     firstName: string;
     lastName: string;
-    phoneNumber?: string;
+    phone?: string;
     isAdmin?: boolean;
     image?: string;
     initials?: string;
@@ -18,7 +18,7 @@ declare module "next-auth" {
       email: string;
       firstName: string;
       lastName: string;
-      phoneNumber?: string;
+      phone?: string;
       isAdmin?: boolean;
       image?: string;
       initials?: string;
@@ -30,7 +30,7 @@ declare module "next-auth" {
     email: string;
     firstName: string;
     lastName: string;
-    phoneNumber?: string;
+    phone?: string;
     isAdmin?: boolean;
     image?: string;
     initials?: string;

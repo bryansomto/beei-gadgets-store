@@ -23,8 +23,9 @@ import { formatPrice } from "@/lib/formatPrice";
 const addressSchema = z.object({
   name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: phoneSchema,
+  phone: phoneSchema,
   streetAddress: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
@@ -152,8 +153,9 @@ export default function CheckoutPage() {
     defaultValues: {
       name: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
       streetAddress: "",
+      city: "",
       state: "",
       postalCode: "",
       country: "",
@@ -195,8 +197,9 @@ export default function CheckoutPage() {
         const initialValues: AddressFormData = {
           name: addressData?.name || fullName || "",
           email: addressData?.email || user.email || "",
-          phoneNumber: addressData?.phoneNumber || "",
+          phone: addressData?.phone || "",
           streetAddress: addressData?.streetAddress || "",
+          city: addressData?.city || "",
           state: addressData?.state || "",
           postalCode: addressData?.postalCode || "",
           country: addressData?.country || "",
@@ -234,7 +237,7 @@ export default function CheckoutPage() {
       });
 
       // Create order with payment method
-      const { data: order } = await axios.post("/api/checkout", {
+      const { data: orderData } = await axios.post("/api/checkout", {
         userEmail: user.email,
         userName: data.name,
         items: cartItems,
@@ -243,16 +246,49 @@ export default function CheckoutPage() {
         paymentMethod,
       });
 
+      if (!orderData.success) {
+        throw new Error(orderData.message || "Failed to create order");
+      }
+
       // Clear cart
       await clearCart();
 
       // Redirect based on payment method
-      if (paymentMethod === "debit_card") {
-        router.push(`/payment/debit-card/${order._id}`);
-      } else if (paymentMethod === "bank_transfer") {
-        router.push(`/payment/bank-transfer/${order._id}`);
-      } else {
-        router.push(`/order/confirmation/${order._id}`);
+      if (paymentMethod === "debit_card" || paymentMethod === "bank_transfer") {
+        if (orderData.authorizationUrl && orderData.reference) {
+          if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
+            toast.error("Payment configuration error. Please contact support.");
+            return;
+          }
+          // Initialize Paystack Pop
+          if (typeof window === "undefined" || !(window as any).PaystackPop) {
+            toast.error(
+              "Payment system not loaded. Please refresh and try again."
+            );
+            return;
+          }
+
+          const paystack = (window as any).PaystackPop.setup({
+            key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+            email: data.email,
+            amount: cartTotal * 100, // amount in kobo
+            ref: orderData.reference,
+            callback: (response: any) => {
+              toast.success("Payment successful! Processing your order...");
+              router.push(`/order/confirmation/${orderData.orderId}`);
+            },
+            onClose: () => {
+              toast.error("Payment window closed.");
+            },
+          });
+
+          paystack.openIframe();
+        } else {
+          throw new Error("Payment initialization failed");
+        }
+      } else if (paymentMethod === "call_rep") {
+        // Redirect to order confirmation
+        router.push(`/order/confirmation/${orderData.orderId}`);
         toast.success(
           "Order placed successfully! Our representative will call you shortly."
         );
@@ -337,16 +373,16 @@ export default function CheckoutPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone number</Label>
+              <Label htmlFor="phone">Phone number</Label>
               <Controller
-                name="phoneNumber"
+                name="phone"
                 control={control}
                 render={({ field }) => (
                   <>
-                    <Input id="phoneNumber" {...field} required />
-                    {errors.phoneNumber && (
+                    <Input id="phone" {...field} required />
+                    {errors.phone && (
                       <p className="text-sm text-red-500">
-                        {errors.phoneNumber.message}
+                        {errors.phone.message}
                       </p>
                     )}
                   </>
@@ -371,8 +407,24 @@ export default function CheckoutPage() {
                 )}
               />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="state">City</Label>
+                <Controller
+                  name="city"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <Input id="state" {...field} required />
+                      {errors.city && (
+                        <p className="text-sm text-red-500">
+                          {errors.city.message}
+                        </p>
+                      )}
+                    </>
+                  )}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
                 <Controller
@@ -390,6 +442,8 @@ export default function CheckoutPage() {
                   )}
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="postalCode">Postal Code</Label>
                 <Controller
@@ -407,24 +461,23 @@ export default function CheckoutPage() {
                   )}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
-              <Controller
-                name="country"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <Input id="country" {...field} required />
-                    {errors.country && (
-                      <p className="text-sm text-red-500">
-                        {errors.country.message}
-                      </p>
-                    )}
-                  </>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <Input id="country" {...field} required />
+                      {errors.country && (
+                        <p className="text-sm text-red-500">
+                          {errors.country.message}
+                        </p>
+                      )}
+                    </>
+                  )}
+                />
+              </div>
             </div>
 
             {/* Payment Method Selection */}

@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { firstName, lastName, phoneNumber } = data;
+    const { firstName, lastName, phone } = data;
 
     // Validate required fields
     if (!firstName || !lastName) {
@@ -30,10 +30,10 @@ export async function PUT(req: NextRequest) {
     let processedPhoneNumber = '';
 
     // Process phone number if provided
-    if (phoneNumber && phoneNumber.trim() !== '') {
+    if (phone && phone.trim() !== '') {
       try {
         // Use phoneSchema to validate and transform
-        const result = phoneSchema.safeParse(phoneNumber);
+        const result = phoneSchema.safeParse(phone);
         
         if (result.success) {
           processedPhoneNumber = result.data;
@@ -57,9 +57,9 @@ export async function PUT(req: NextRequest) {
       lastName,
     };
     
-    // Only add phoneNumber to update if it's not empty
+    // Only add phone to update if it's not empty
     if (processedPhoneNumber !== '') {
-      updateData.phoneNumber = processedPhoneNumber;
+      updateData.phone = processedPhoneNumber;
     }
 
     // Update the user
@@ -78,7 +78,7 @@ export async function PUT(req: NextRequest) {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
-      phoneNumber: updatedUser.phoneNumber || '', // Use optional chaining
+      phone: updatedUser.phone || '', // Use optional chaining
     };
 
     return NextResponse.json(userProfile);
@@ -105,12 +105,12 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Return all fields with safe access to phoneNumber
+    // Return all fields with safe access to phone
     const userProfile = {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      phoneNumber: user.phoneNumber
+      phone: user.phone
     };
 
     return NextResponse.json(userProfile);
