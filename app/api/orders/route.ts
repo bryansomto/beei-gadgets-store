@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
     await mongooseConnect();
     
     const orders = await Order.find().sort({ createdAt: -1 });
+    console.log("Fetched orders:", orders);
     return NextResponse.json(orders, { status: 200 });
   } catch (error) {
     console.error("Error fetching orders:", error);

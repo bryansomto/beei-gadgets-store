@@ -53,7 +53,6 @@ interface PaystackEvent {
     plan?: number | null;
     split?: Record<string, unknown>;
     order_id?: string | null;
-    paidAt?: string;
     createdAt?: string;
     metadata?: {
       orderId?: string;
@@ -62,6 +61,7 @@ interface PaystackEvent {
       paymentMethod?: string;
     };
   };
+  reference?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -73,10 +73,7 @@ export async function POST(req: NextRequest) {
     // Verify webhook signature
     if (!verifyPaystackWebhook(Buffer.from(body), signature)) {
       console.warn('Invalid Paystack webhook signature');
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ received: true });
     }
 
     const event: PaystackEvent = JSON.parse(Buffer.from(body).toString());
@@ -116,7 +113,7 @@ export async function POST(req: NextRequest) {
       {
         $set: {
           paid: true,
-          status: 'confirmed',
+          status: 'paid',
           paymentReference: reference,
           paymentVerifiedAt: new Date(),
           paymentData: {

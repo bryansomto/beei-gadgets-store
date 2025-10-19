@@ -27,6 +27,7 @@ interface IOrder extends Document {
   total: number;
   address: IAddress;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paid: boolean;
   createdAt: Date;
 }
 
@@ -87,6 +88,7 @@ const OrderSchema = new Schema<IOrder>({
       lowercase: true,
       match: [/\S+@\S+\.\S+/, 'Please use a valid email address']
     },
+    
     city: { 
       type: String, 
       required: [true, 'City is required'],
@@ -117,6 +119,10 @@ const OrderSchema = new Schema<IOrder>({
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending',
     trim: true
+  },
+  paid: { 
+    type: Boolean, 
+    default: false 
   },
   createdAt: { 
     type: Date, 

@@ -125,17 +125,6 @@ export async function POST(req: NextRequest) {
 
     await mongooseConnect();
 
-    //  const mappedAddress = {
-    //   name: address.name,
-    //   email: address.email,
-    //   phone: address.phone,
-    //   street: address.streetAddress,
-    //   city: address.city,
-    //   state: address.state,
-    //   zipCode: address.postalCode,
-    //   country: address.country,
-    // };
-
     // Create Order
     const order = new Order({
       userEmail,

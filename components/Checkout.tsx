@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { phoneSchema } from "@/lib/phoneSchema";
 import { formatPrice } from "@/lib/formatPrice";
+import Script from "next/script";
 
 // Define your form schema
 const addressSchema = z.object({
@@ -220,6 +221,34 @@ export default function CheckoutPage() {
     setSelectedPaymentMethod(method);
   };
 
+  const verifyPaymentWithServer = async (
+    reference: string,
+    orderId: string
+  ) => {
+    const verifyingToast = toast.loading("Verifying payment...");
+
+    try {
+      const verifyRes = await axios.post("/api/payment/paystack/verify", {
+        reference,
+        orderId,
+      });
+
+      if (verifyRes.data.success) {
+        toast.dismiss(verifyingToast);
+        toast.success("Payment verified! 🎉");
+        await clearCart();
+        router.push(`/order/confirmation/${orderId}`);
+      } else {
+        toast.dismiss(verifyingToast);
+        toast.error(verifyRes.data.message || "Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      toast.dismiss(verifyingToast);
+      toast.error("Unable to verify payment. Please contact support.");
+    }
+  };
+
   const processOrder = async (
     paymentMethod: PaymentMethod,
     data: AddressFormData
@@ -236,7 +265,7 @@ export default function CheckoutPage() {
         ...data,
       });
 
-      // Create order with payment method
+      // Create order
       const { data: orderData } = await axios.post("/api/checkout", {
         userEmail: user.email,
         userName: data.name,
@@ -250,44 +279,54 @@ export default function CheckoutPage() {
         throw new Error(orderData.message || "Failed to create order");
       }
 
-      // Clear cart
-      await clearCart();
-
-      // Redirect based on payment method
       if (paymentMethod === "debit_card" || paymentMethod === "bank_transfer") {
-        if (orderData.authorizationUrl && orderData.reference) {
-          if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
-            toast.error("Payment configuration error. Please contact support.");
-            return;
-          }
-          // Initialize Paystack Pop
-          if (typeof window === "undefined" || !(window as any).PaystackPop) {
-            toast.error(
-              "Payment system not loaded. Please refresh and try again."
-            );
-            return;
-          }
-
-          const paystack = (window as any).PaystackPop.setup({
-            key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-            email: data.email,
-            amount: cartTotal * 100, // amount in kobo
-            ref: orderData.reference,
-            callback: (response: any) => {
-              toast.success("Payment successful! Processing your order...");
-              router.push(`/order/confirmation/${orderData.orderId}`);
-            },
-            onClose: () => {
-              toast.error("Payment window closed.");
-            },
-          });
-
-          paystack.openIframe();
-        } else {
-          throw new Error("Payment initialization failed");
+        // Ensure Paystack is loaded
+        if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
+          toast.error("Payment configuration error. Please contact support.");
+          return;
         }
+
+        // Check if PaystackPop exists
+        if (typeof window === "undefined" || !(window as any).PaystackPop) {
+          toast.error(
+            "Payment system not loaded. Please refresh and try again."
+          );
+          return;
+        }
+
+        const paystack = (window as any).PaystackPop.setup({
+          key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+          email: data.email,
+          amount: cartTotal * 100,
+          ref: orderData.reference,
+          currency: "NGN",
+          callback: function (response: any) {
+            // ✅ Must be a plain function — not async
+            console.log("Payment success response:", response);
+
+            // Use an async IIFE inside to allow async/await safely
+            (async () => {
+              try {
+                await verifyPaymentWithServer(
+                  response.reference,
+                  orderData.orderId
+                );
+              } catch (error) {
+                console.error("Payment verification failed:", error);
+                toast.error(
+                  "Could not verify payment. Please contact support."
+                );
+              }
+            })();
+          },
+          onClose: function () {
+            toast.error("Payment window closed before completion.");
+          },
+        });
+
+        // ✅ Use openIframe, not chargeCustomer
+        paystack.openIframe();
       } else if (paymentMethod === "call_rep") {
-        // Redirect to order confirmation
         router.push(`/order/confirmation/${orderData.orderId}`);
         toast.success(
           "Order placed successfully! Our representative will call you shortly."
@@ -601,6 +640,10 @@ export default function CheckoutPage() {
                 </Button>
               )}
             </div>
+            <Script
+              src="https://js.paystack.co/v1/inline.js"
+              strategy="afterInteractive"
+            />
           </form>
         </div>
 
