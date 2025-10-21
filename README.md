@@ -169,7 +169,8 @@ npm run test
 
 ## 🧑‍🤝‍🧑 Contributors
 
-- [@bryansomto](https://github.com/bryansomto) — Developer & Maintainer
+- [@bryansomto](https://github.com/bryansomto) — Developer & Maintainer  
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-blue?logo=linkedin)](https://www.linkedin.com/in/bryansomto)
 
 ---
 
