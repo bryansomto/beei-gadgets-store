@@ -122,7 +122,7 @@ beei-gadgets-store/
 2. **Install dependencies**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Create `.env.local` file**
@@ -152,7 +152,7 @@ beei-gadgets-store/
 4. **Run the development server**
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
    Then open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -162,7 +162,7 @@ beei-gadgets-store/
 ## 🧪 Testing
 
 ```bash
-npm run test
+pnpm test
 ```
 
 ---
