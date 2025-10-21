@@ -66,48 +66,38 @@ interface PaystackEvent {
 
 export async function POST(req: NextRequest) {
   try {
-    // Get the raw body for signature verification
     const body = await req.arrayBuffer();
     const signature = req.headers.get('x-paystack-signature');
 
-    // Verify webhook signature
     if (!verifyPaystackWebhook(Buffer.from(body), signature)) {
       console.warn('Invalid Paystack webhook signature');
+      return NextResponse.json({ received: true }); // Always return 200
+    }
+
+    let event;
+    try {
+      event = JSON.parse(Buffer.from(body).toString());
+    } catch (err) {
+      console.error("Invalid JSON in webhook:", err);
       return NextResponse.json({ received: true });
     }
 
-    const event: PaystackEvent = JSON.parse(Buffer.from(body).toString());
-
-    // Only process successful charge events
     if (event.event !== 'charge.success') {
       console.log(`Ignoring event: ${event.event}`);
-      return NextResponse.json({ success: true, message: 'Event ignored' });
+      return NextResponse.json({ received: true });
     }
 
-    const { reference, data } = event;
+    const data = event.data;
+    const reference = data?.reference;
+    const orderId = data?.metadata?.orderId;
 
-    if (!reference || !data) {
-      console.error('Missing reference or data in webhook');
-      return NextResponse.json(
-        { error: 'Invalid payload' },
-        { status: 400 }
-      );
+    if (!orderId) {
+      console.error('No orderId found in webhook metadata');
+      return NextResponse.json({ received: true });
     }
 
     await mongooseConnect();
 
-    // Extract order ID from metadata
-    const orderId = data.metadata?.orderId;
-
-    if (!orderId) {
-      console.error('No orderId in webhook metadata');
-      return NextResponse.json(
-        { error: 'No orderId found' },
-        { status: 400 }
-      );
-    }
-
-    // Find and update the order
     const order = await Order.findByIdAndUpdate(
       orderId,
       {
@@ -117,7 +107,7 @@ export async function POST(req: NextRequest) {
           paymentReference: reference,
           paymentVerifiedAt: new Date(),
           paymentData: {
-            amount: data.amount / 100, // Convert kobo back to naira
+            amount: Math.round(data.amount / 100),
             currency: 'NGN',
             customerEmail: data.customer.email,
             authorizationCode: data.authorization?.authorization_code,
@@ -131,34 +121,20 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       console.error(`Order not found: ${orderId}`);
-      return NextResponse.json(
-        { error: 'Order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ received: true });
     }
 
-    console.log(`Order ${orderId} payment verified and confirmed`);
+    console.log(`✅ Order ${orderId} marked as paid (Ref: ${reference})`);
 
-    // TODO: Send confirmation email to customer
-    // TODO: Trigger order fulfillment process
-    // TODO: Update inventory
+    // TODO: send email, update inventory, trigger fulfillment
 
-    return NextResponse.json({
-      success: true,
-      message: 'Payment verified',
-      orderId: order._id,
-    });
-
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Webhook error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ received: true });
   }
 }
 
-// Health check endpoint
 export async function GET() {
   return NextResponse.json({
     status: 'webhook_active',

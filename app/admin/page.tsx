@@ -14,7 +14,7 @@ export default function Home() {
   const stats = [
     {
       title: "Total Revenue",
-      value: "$45,231.89",
+      value: "₦45,231.89",
       change: "+20.1% from last month",
       icon: DollarSign,
     },
@@ -42,27 +42,27 @@ export default function Home() {
     {
       name: "Wireless Earbuds",
       email: "electronics",
-      amount: "+$1,999.00",
+      amount: "+₦1,999.00",
     },
     {
       name: "Leather Wallet",
       email: "accessories",
-      amount: "+$49.99",
+      amount: "+₦49.99",
     },
     {
       name: "Smart Watch",
       email: "electronics",
-      amount: "+$299.99",
+      amount: "+₦299.99",
     },
     {
       name: "Cotton T-Shirt",
       email: "clothing",
-      amount: "+$29.99",
+      amount: "+₦29.99",
     },
     {
       name: "Ceramic Mug",
       email: "home",
-      amount: "+$12.99",
+      amount: "+₦12.99",
     },
   ];
 

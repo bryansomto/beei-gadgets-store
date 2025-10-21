@@ -2,21 +2,6 @@ import { notFound } from "next/navigation";
 import ProductPageClient from "./ProductPageClient";
 import { Product } from "@/types";
 
-// interface Product {
-//   _id: string;
-//   name: string;
-//   description: string;
-//   images: string[];
-//   price: number;
-//   category: { _id: string; name: string };
-//   properties: Record<string, string>;
-//   rating: number;
-//   reviews: number;
-//   stock: number;
-//   createdAt: string;
-//   updatedAt: string;
-// }
-
 export const dynamicParams = true;
 export const revalidate = 3600;
 

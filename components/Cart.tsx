@@ -150,7 +150,7 @@ export function Cart() {
 
             <div className="space-y-3">
               <Button className="w-full h-12 text-base font-semibold" asChild>
-                <Link href="/checkout">Proceed to Checkout</Link>
+                <Link href="/cart/checkout">Proceed to Checkout</Link>
               </Button>
 
               <Link href="/products">
