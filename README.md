@@ -17,6 +17,12 @@ An **elegant, full-stack e-commerce store for mobile and home gadgets** built wi
 
 ---
 
+## 🌍 Live Demo
+
+👉 [**beei-gadgets-store.vercel.app**](https://beei-gadgets-store.vercel.app/)
+
+---
+
 ## 🖼️ Screenshots
 
 <div align="center">
