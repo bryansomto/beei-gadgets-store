@@ -1,4 +1,4 @@
-name: Build
+name: Build Check
 
 on:
   push:
@@ -17,8 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "pnpm"
+          node-version: 18
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -26,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
-        env:
-          NEXT_PUBLIC_API_URL: "http://localhost:3000/api"
+      - name: Build Next.js app
         run: pnpm build
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:3000/api" # local dev URL
