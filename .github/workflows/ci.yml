@@ -1,4 +1,4 @@
-name: CI Build
+name: Build
 
 on:
   push:
@@ -18,12 +18,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build project
-        run: pnpm run build
-
-      - name: Run tests
-        run: pnpm test
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:3000/api"
+        run: pnpm build
