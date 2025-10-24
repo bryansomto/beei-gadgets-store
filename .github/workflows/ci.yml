@@ -1,4 +1,4 @@
-name: Build Check
+name: Build and Test
 
 on:
   push:
@@ -9,6 +9,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
+      AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      NEXT_PUBLIC_ADMIN_EMAILS: ${{ secrets.NEXT_PUBLIC_ADMIN_EMAILS }}
+      NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+      PASSWORD_PEPPER: ${{ secrets.PASSWORD_PEPPER }}
+      PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+      S3_REGION: ${{ secrets.S3_REGION }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      NEXT_PUBLIC_API_URL: http://localhost:3000 # Optional for local API builds
 
     steps:
       - name: Checkout repository
@@ -26,6 +43,7 @@ jobs:
         run: pnpm install
 
       - name: Build Next.js app
-        run: pnpm build
-        env:
-          NEXT_PUBLIC_API_URL: "http://localhost:3000/api" # local dev URL
+        run: pnpm run build
+
+      - name: Run linting
+        run: pnpm run lint
