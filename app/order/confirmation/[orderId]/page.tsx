@@ -106,7 +106,7 @@ const OrderTimeline = ({ status }: { status: Order["status"] }) => {
       {steps.map((step, index) => {
         const StepIcon = step.icon;
         const isCompleted = index <= currentStepIndex;
-        const isCurrent = index === currentStepIndex;
+        // const isCurrent = index === currentStepIndex;
 
         return (
           <div key={step.key} className="flex flex-col items-center">
@@ -338,7 +338,7 @@ export default async function OrderConfirmationPage(props: {
       {/* Next Steps */}
       <Card className="mt-8">
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">What's Next?</h3>
+          <h3 className="text-lg font-semibold mb-4">What&apos;s Next?</h3>
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <div className="text-center">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -346,7 +346,7 @@ export default async function OrderConfirmationPage(props: {
               </div>
               <h4 className="font-medium mb-1">Order Processing</h4>
               <p className="text-muted-foreground">
-                We'll prepare your items for shipping within 24 hours.
+                We&apos;ll prepare your items for shipping within 24 hours.
               </p>
             </div>
             <div className="text-center">
@@ -355,7 +355,7 @@ export default async function OrderConfirmationPage(props: {
               </div>
               <h4 className="font-medium mb-1">Shipping</h4>
               <p className="text-muted-foreground">
-                You'll receive tracking information once your order ships.
+                You&apos;ll receive tracking information once your order ships.
               </p>
             </div>
             <div className="text-center">

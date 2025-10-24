@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import axios from "axios";
 import {
@@ -60,16 +60,11 @@ export default function OrdersPage() {
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  async function fetchOrders() {
+  const fetchOrders = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data } = await axios.get<Order[]>("/api/orders");
 
-      // Validate and ensure each order has a proper ID
       const validatedOrders = data.map((order) => ({
         ...order,
         _id:
@@ -89,7 +84,11 @@ export default function OrdersPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [toast]); // ✅ dependencies
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   async function toggleOrderStatus(orderId: string, currentPaid: boolean) {
     if (!orderId) {
@@ -98,7 +97,7 @@ export default function OrdersPage() {
     }
 
     try {
-      setUpdatingOrder(orderId);
+      setUpdatingOrder(orderId ?? null);
       const newPaidStatus = !currentPaid;
       const newStatus = newPaidStatus ? "processing" : "pending";
 

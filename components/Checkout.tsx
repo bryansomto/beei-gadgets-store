@@ -146,9 +146,7 @@ export default function CheckoutPage() {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
     reset,
-    trigger,
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -287,20 +285,20 @@ export default function CheckoutPage() {
         }
 
         // Check if PaystackPop exists
-        if (typeof window === "undefined" || !(window as any).PaystackPop) {
+        if (typeof window === "undefined" || !window.PaystackPop) {
           toast.error(
             "Payment system not loaded. Please refresh and try again."
           );
           return;
         }
 
-        const paystack = (window as any).PaystackPop.setup({
+        const paystack = window.PaystackPop.setup({
           key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
           email: data.email,
           amount: cartTotal * 100,
           ref: orderData.reference,
           currency: "NGN",
-          callback: function (response: any) {
+          callback: function (response: { reference: string }) {
             // ✅ Must be a plain function — not async
             console.log("Payment success response:", response);
 

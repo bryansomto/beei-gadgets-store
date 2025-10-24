@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { Badge } from "@/components/ui/badge";
+import { Product } from "@/types";
 
-export default function WishlistItem({ product }: { product: any }) {
+export default function WishlistItem({ product }: { product: Product }) {
   const handleRemove = async () => {
     try {
       const response = await fetch("/api/wishlist", {

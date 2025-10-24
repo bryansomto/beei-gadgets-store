@@ -31,38 +31,33 @@ export async function PUT(req: NextRequest) {
 
     // Process phone number if provided
     if (phone && phone.trim() !== '') {
-      try {
-        // Use phoneSchema to validate and transform
-        const result = phoneSchema.safeParse(phone);
-        
-        if (result.success) {
-          processedPhoneNumber = result.data;
-        } else {
-          return NextResponse.json(
-            { error: result.error.errors[0].message }, 
-            { status: 400 }
-          );
-        }
-      } catch (error) {
+      const result = phoneSchema.safeParse(phone);
+      if (result.success) {
+        processedPhoneNumber = result.data;
+      } else {
         return NextResponse.json(
-          { error: 'Invalid phone number format' }, 
+          { error: result.error.errors[0].message },
           { status: 400 }
         );
       }
     }
 
-    // Prepare update data
-    const updateData: any = { 
+    // Define a proper type instead of `any`
+    interface UpdateData {
+      firstName: string;
+      lastName: string;
+      phone?: string;
+    }
+
+    const updateData: UpdateData = { 
       firstName,
       lastName,
     };
     
-    // Only add phone to update if it's not empty
     if (processedPhoneNumber !== '') {
       updateData.phone = processedPhoneNumber;
     }
 
-    // Update the user
     const updatedUser = await User.findOneAndUpdate(
       { email: session.user.email },
       updateData,
@@ -73,17 +68,16 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Return updated profile
     const userProfile = {
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       email: updatedUser.email,
-      phone: updatedUser.phone || '', // Use optional chaining
+      phone: updatedUser.phone || '',
     };
 
     return NextResponse.json(userProfile);
-  } catch (error) {
-    console.error('Error updating user profile:', error);
+  } catch {
+    console.error('Error updating user profile');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -105,17 +99,16 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Return all fields with safe access to phone
     const userProfile = {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      phone: user.phone
+      phone: user.phone,
     };
 
     return NextResponse.json(userProfile);
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
+  } catch {
+    console.error('Error fetching user profile');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

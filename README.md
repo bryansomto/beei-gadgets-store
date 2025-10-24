@@ -98,6 +98,7 @@ beei-gadgets-store/
 ├── app/ # Next.js App Router pages & layouts
 ├── components/ # Reusable UI components
 ├── context/ # Global state providers (cart, user, etc.)
+├── hooks/ # Custom React hooks
 ├── lib/ # Utilities (db, auth, Paystack, etc.)
 ├── models/ # Mongoose schemas (User, Product, Order)
 ├── public/ # Static assets & screenshots

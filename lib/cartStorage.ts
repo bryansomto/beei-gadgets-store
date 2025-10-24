@@ -1,3 +1,5 @@
+import { CartItem } from "@/types/cart";
+
 // utils/cartStorage.ts
 export const getGuestCart = () => {
     if (typeof window === "undefined") return [];
@@ -8,7 +10,7 @@ export const getGuestCart = () => {
     }
   };
   
-  export const saveGuestCart = (cart: any[]) => {
+  export const saveGuestCart = (cart: CartItem[]) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("guestCart", JSON.stringify(cart));
     }

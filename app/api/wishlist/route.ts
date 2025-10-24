@@ -1,42 +1,39 @@
-// app/api/wishlist/route.ts
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { Wishlist } from "@/models/Wishlist";
-import { mongooseConnect } from "@/lib/mongoose";
 import { auth } from "@/auth";
-import { Product } from "@/models/Product";
+import { mongooseConnect } from "@/lib/mongoose";
+import { IProduct } from "@/models/Product"; // ensure this interface exists
 
 interface WishlistRequest {
   productId: string;
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     await mongooseConnect();
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const wishlist = await Wishlist.findOne({ user: session.user.id })
-      .populate<{ products: typeof Product.schema.obj[] }>("products")
+      .populate<{ products: (IProduct & { _id: mongoose.Types.ObjectId })[] }>("products")
       .lean()
       .exec();
 
-    if (!wishlist) {
+    if (!wishlist || !("products" in wishlist)) {
       return NextResponse.json([], { status: 200 });
     }
 
-    // Type guard to ensure products exists
-    const products = 'products' in wishlist ? wishlist.products : [];
-    
-    // Transform the data to ensure proper serialization
-    const serializedProducts = products.map(product => ({
-      _id: product._id?.toString() ?? "unknown",
+    const products = wishlist.products ?? [];
+
+    const serializedProducts = products.map((product) => ({
+      _id: (product._id as mongoose.Types.ObjectId).toString(),
       name: product.name,
       price: product.price,
       images: product.images,
-      // include other necessary fields
       ...(product.discount && { discount: product.discount }),
       ...(product.isNew && { isNew: product.isNew }),
     }));
@@ -50,6 +47,8 @@ export async function GET(req: Request) {
     );
   }
 }
+
+
 
 export async function POST(req: Request) {
   try {
@@ -69,14 +68,17 @@ export async function POST(req: Request) {
     }
 
     let wishlist = await Wishlist.findOne({ user: session.user.id });
+    const productObjectId = new mongoose.Types.ObjectId(productId);
 
     if (!wishlist) {
       wishlist = await Wishlist.create({
         user: session.user.id,
-        products: [productId],
+        products: [productObjectId],
       });
-    } else if (!wishlist.products.includes(productId as any)) {
-      wishlist.products.push(productId as any);
+    } else if (
+      !wishlist.products.some((p: mongoose.Types.ObjectId) => p.equals(productObjectId))
+    ) {
+      wishlist.products.push(productObjectId);
       await wishlist.save();
     }
 
@@ -102,7 +104,7 @@ export async function DELETE(req: Request) {
 
     await Wishlist.findOneAndUpdate(
       { user: session.user.id },
-      { $pull: { products: productId } }
+      { $pull: { products: new mongoose.Types.ObjectId(productId) } }
     );
 
     return NextResponse.json({ success: true });

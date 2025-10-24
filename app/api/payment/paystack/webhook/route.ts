@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true }); // Always return 200
     }
 
-    let event;
+    let event: PaystackEvent;
     try {
       event = JSON.parse(Buffer.from(body).toString());
     } catch (err) {

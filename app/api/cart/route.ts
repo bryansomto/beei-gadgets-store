@@ -1,6 +1,6 @@
 // app/api/cart/route.ts
 import { auth } from "@/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { Cart } from "@/models/Cart";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Types } from "mongoose";
@@ -25,7 +25,7 @@ interface CartWithItems {
   __v?: number;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     await mongooseConnect();
     const session = await auth();

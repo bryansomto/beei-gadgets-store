@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Badge } from "./ui/badge";
 import { useCart } from "@/context/CartContext";
+import Image from "next/image";
 
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -39,9 +40,8 @@ export default function ProductGrid({
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(!initialProducts.length);
   const [error, setError] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,6 +58,7 @@ export default function ProductGrid({
         if (data?.success && Array.isArray(data.products)) {
           setProducts(data.products);
         } else {
+          console.error("Invalid product data structure received:", data);
           setError("Invalid product data structure received.");
           setProducts([]);
         }
@@ -70,13 +71,13 @@ export default function ProductGrid({
       }
     };
 
-    if (!initialProducts || initialProducts.length === 0) {
-      fetchProducts();
-    } else {
+    if (initialProducts && initialProducts.length > 0) {
       setProducts(initialProducts);
       setLoading(false);
+    } else {
+      fetchProducts();
     }
-  }, [limit, category]);
+  }, [limit, category, initialProducts]);
 
   const handleWishlistClick = async (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
@@ -195,11 +196,13 @@ export default function ProductGrid({
                     >
                       <div className="relative md:col-span-1 aspect-square bg-gray-50 dark:bg-zinc-800">
                         {product.images?.[0] ? (
-                          <img
+                          <Image
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             src={product.images[0]}
                             alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
+                            width={500}
+                            height={500}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-zinc-600">
@@ -287,7 +290,7 @@ export default function ProductGrid({
                               e.preventDefault();
                               addToCart(product);
                             }}
-                            disabled={isLoading || isAdding}
+                            disabled={isLoading}
                           >
                             <FaCartPlus className="h-4 w-4" />
                             {/* Add to Cart */}
@@ -317,11 +320,13 @@ export default function ProductGrid({
                 >
                   <div className="relative aspect-square bg-gray-50 dark:bg-zinc-800">
                     {product.images?.[0] ? (
-                      <img
+                      <Image
                         src={product.images[0]}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
+                        width={500}
+                        height={500}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-100">
@@ -404,7 +409,7 @@ export default function ProductGrid({
                           e.preventDefault();
                           addToCart(product);
                         }}
-                        disabled={isLoading || isAdding}
+                        disabled={isLoading}
                       >
                         <FaCartPlus className="h-3.5 w-3.5" />
                         Add to Cart

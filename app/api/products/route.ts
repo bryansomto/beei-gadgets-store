@@ -37,10 +37,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(product);
     }
 
-    // 🛠 Build filter object
-    const filter: any = {
-      price: { $gte: minPrice, $lte: maxPrice },
-    };
+    const filter: Record<string, unknown> = {
+  price: { $gte: minPrice, $lte: maxPrice },
+};
 
     if (featured) {
       filter.featured = true;

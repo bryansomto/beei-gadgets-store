@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/auth";
 import { cookies } from "next/headers";
+import { Product } from "@/types";
 
 export default async function WishlistPage() {
   const session = await auth();
@@ -67,7 +68,7 @@ export default async function WishlistPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product: any) => (
+            {products.map((product: Product) => (
               <WishlistItem key={product._id} product={product} />
             ))}
           </div>

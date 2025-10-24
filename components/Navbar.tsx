@@ -6,8 +6,7 @@ import { SignOutButton } from "./SessionButtons";
 import useUser from "@/lib/userSession";
 import { HashLoader } from "react-spinners";
 import { useState } from "react";
-import { Menu, X, ShoppingCart } from "lucide-react";
-import { buttonVariants } from "./ui/button";
+import { X, ShoppingCart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useCart } from "@/context/CartContext";
 import { ModeToggle } from "./ModeToggle";
@@ -15,7 +14,7 @@ import { useWishlist } from "@/context/WishlistContext";
 
 const Navbar = () => {
   const { user, isAdmin, image, initials, loading } = useUser();
-  const { cartCount, clearCart, cartItems, syncCartToDB } = useCart();
+  const { cartCount, cartItems, syncCartToDB } = useCart();
   const { getWishlistCount } = useWishlist();
   const [isOpen, setIsOpen] = useState(false);
 

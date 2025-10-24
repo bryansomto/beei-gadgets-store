@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Order } from "@/models/Order";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     await mongooseConnect();
     

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { withSwal } from "react-sweetalert2";
-import { SweetAlertResult } from "sweetalert2";
+import Swal, { SweetAlertResult } from "sweetalert2";
 import { HashLoader } from "react-spinners";
 import Layout from "./components/Layout";
 
@@ -115,6 +115,6 @@ function SettingsPage({ swal }: SettingsPageProps) {
   );
 }
 
-export default withSwal(({ swal }: { swal: any }) => (
+export default withSwal(({ swal }: { swal: typeof Swal }) => (
   <SettingsPage swal={swal} />
 ));

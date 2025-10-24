@@ -1,5 +1,6 @@
-// types/next-auth.d.ts
-import { User as NextAuthUser } from "next-auth";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import type { User as _NextAuthUser } from "next-auth";
 
 declare module "next-auth" {
   interface User {

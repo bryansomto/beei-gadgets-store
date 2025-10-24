@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 import ProductForm from "../components/ProductForm";
@@ -20,6 +20,7 @@ import { Trash2, Edit, Plus, X, Package, Search } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useDeleteItem } from "@/hooks/useDeleteItem";
 
 interface Product {
   _id: string;
@@ -39,14 +40,9 @@ export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  async function fetchProducts() {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data } = await axios.get<{ products: Product[] }>(
@@ -64,7 +60,16 @@ export default function ProductsPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [toast]);
+
+  const { handleDelete, isDeleting } = useDeleteItem({
+    resource: "products",
+    onDeleted: fetchProducts,
+  });
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   function handleEdit(product: Product) {
     setSelectedProduct(product);
@@ -80,62 +85,6 @@ export default function ProductsPage() {
   function handleAddNew() {
     setSelectedProduct(null);
     setShowForm(true);
-  }
-
-  async function handleDelete(product: Product) {
-    try {
-      setIsDeleting(product._id);
-      const confirmed = await confirmDelete(product.name);
-
-      if (confirmed) {
-        await axios.delete(`/api/products?id=${product._id}`);
-        toast({
-          title: "Success",
-          description: `"${product.name}" deleted successfully`,
-        });
-        fetchProducts();
-      }
-    } catch (error) {
-      console.error("Failed to delete product", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete product",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(null);
-    }
-  }
-
-  async function confirmDelete(productName: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      toast({
-        title: `Delete "${productName}"?`,
-        description: "This action cannot be undone.",
-        action: (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                resolve(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                resolve(true);
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        ),
-      });
-    });
   }
 
   const filteredProducts = products.filter(
@@ -350,7 +299,9 @@ export default function ProductsPage() {
                               <Button
                                 variant="destructive"
                                 size="icon"
-                                onClick={() => handleDelete(product)}
+                                onClick={() =>
+                                  handleDelete(product._id, product.name)
+                                }
                                 disabled={isDeleting === product._id}
                                 className="h-8 w-8"
                               >

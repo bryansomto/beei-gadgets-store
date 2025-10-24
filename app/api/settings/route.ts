@@ -12,12 +12,12 @@ export async function GET(req: NextRequest) {
     } else {
       return NextResponse.json({ message: "Setting not found" }, { status: 404 });
     }
-  } catch (err) {
+  } catch {
     return NextResponse.error();
   }
 }
 
-// Handler for PUT request to update or create a setting
+// PUT handler
 export async function PUT(req: NextRequest) {
   try {
     const { name, value } = await req.json();
@@ -31,16 +31,14 @@ export async function PUT(req: NextRequest) {
     let settingDoc = await Setting.findOne({ name });
 
     if (settingDoc) {
-      // Update the existing setting
       settingDoc.value = value;
       await settingDoc.save();
       return NextResponse.json(settingDoc);
     } else {
-      // Create a new setting
       settingDoc = await Setting.create({ name, value });
       return NextResponse.json(settingDoc);
     }
-  } catch (err) {
+  } catch {
     return NextResponse.error();
   }
 }

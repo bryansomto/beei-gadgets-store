@@ -5,7 +5,6 @@ import { Order } from "@/models/Order";
 export async function POST(req: Request) {
   try {
     const { reference, orderId } = await req.json();
-    console.log("🔹 Verify request:", { reference, orderId });
 
     const res = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       headers: {
@@ -14,20 +13,16 @@ export async function POST(req: Request) {
     });
 
     const data = await res.json();
-    console.log("🔹 Paystack verify response:", data);
 
     // Check for success
     if (data.data?.status === "success") {
       await mongooseConnect();
-      console.log("✅ Connected to MongoDB");
 
       const updatedOrder = await Order.findByIdAndUpdate(
         orderId,
         { paid: true, status: "processing" },
         { new: true }
       );
-
-      console.log("✅ Updated order:", updatedOrder);
 
       if (!updatedOrder) {
         return NextResponse.json({ success: false, message: "Order not found" });

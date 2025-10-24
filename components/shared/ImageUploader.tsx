@@ -3,6 +3,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useFormContext } from "react-hook-form";
 import colors from "@/lib/colors/swalAlerts";
+import Image from "next/image";
 
 export const ImageUploader = () => {
   const { setValue, watch } = useFormContext();
@@ -110,7 +111,7 @@ export const ImageUploader = () => {
       <div className="image-preview">
         {watch("images").map((image: string) => (
           <div key={image} className="image-item">
-            <img src={image} alt="Uploaded" />
+            <Image src={image} alt="Uploaded" width={100} height={100} />
             <button onClick={() => handleImageDelete(image)}>Delete</button>
           </div>
         ))}

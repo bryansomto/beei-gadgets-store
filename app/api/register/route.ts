@@ -4,7 +4,7 @@ import { saltAndHashPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'
 import { NextResponse, NextRequest } from 'next/server'
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
 
   const body = await req.json()
   const { email, password, firstName, lastName } = body

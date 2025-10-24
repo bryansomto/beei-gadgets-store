@@ -34,8 +34,13 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const product = await getProduct(params.id);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const product = await getProduct(id);
   return {
     title: product?.name || "Product Not Found",
     description: product?.description || "View product details",
@@ -48,9 +53,10 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 export default async function ProductPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const product = await getProduct(params.id);
+  const { id } = await params;
+  const product = await getProduct(id);
   if (!product) return notFound();
   return <ProductPageClient product={product} />;
 }

@@ -87,22 +87,30 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-
 export async function DELETE(req: NextRequest) {
   try {
     await mongooseConnect();
-    const { ids } = await req.json(); // expecting { ids: [...] }
 
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (id) {
+      // Support batch deletion via comma-separated IDs
+      const ids = id.split(",").map((i) => i.trim());
+      await Category.deleteMany({ _id: { $in: ids } });
+      return NextResponse.json({ message: "Categories deleted successfully" });
+    }
+
+    // Otherwise expect JSON body (fallback)
+    const { ids } = await req.json();
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: "No category IDs provided" }, { status: 400 });
     }
 
     await Category.deleteMany({ _id: { $in: ids } });
-
-    return NextResponse.json({ message: "Categories deleted successfully" }, { status: 200 });
+    return NextResponse.json({ message: "Categories deleted successfully" });
   } catch (err) {
     console.error("DELETE /categories error:", err);
     return NextResponse.json({ error: "Failed to delete categories" }, { status: 500 });
   }
 }
-

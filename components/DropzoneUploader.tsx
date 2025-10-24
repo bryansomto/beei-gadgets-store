@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { HashLoader } from "react-spinners";
 import axios from "axios";
+import Image from "next/image";
 
 interface DropzoneUploaderProps {
   existingImages: string[];
@@ -56,7 +57,9 @@ export function DropzoneUploader({
         {isDragActive ? (
           <p>Drop the images here...</p>
         ) : (
-          <p>Drag 'n' drop some images here, or click to select files</p>
+          <p>
+            Drag &apos;n&apos; drop some images here, or click to select files
+          </p>
         )}
       </div>
 
@@ -66,9 +69,11 @@ export function DropzoneUploader({
             key={img}
             className="relative w-24 h-24 border border-gray-200 rounded overflow-hidden"
           >
-            <img
+            <Image
               src={img}
               alt="Uploaded"
+              width={96}
+              height={96}
               className="object-cover w-full h-full"
             />
             <button

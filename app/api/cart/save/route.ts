@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get or create cart
-    let cart = await Cart.findOne({ userId }).populate("items") || 
+    const cart = await Cart.findOne({ userId }).populate("items") || 
                await Cart.create({ userId, items: [], total: 0 });
 
     // Create a map of incoming items for easy lookup

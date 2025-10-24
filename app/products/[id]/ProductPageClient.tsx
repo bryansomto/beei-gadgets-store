@@ -43,7 +43,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
         title: "Added to cart!",
         description: `${product.name} has been added to your cart.`,
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Failed to add to cart",
         description: "Please try again.",
@@ -91,7 +91,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
           text: product.description,
           url: window.location.href,
         });
-      } catch (error) {
+      } catch {
         // Share cancelled
       }
     } else {
@@ -189,7 +189,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
                       <div className="bg-red-500 px-4 py-2 rounded-lg font-semibold text-base sm:text-lg mb-2">
                         Out of Stock
                       </div>
-                      <p className="text-sm">We'll restock soon!</p>
+                      <p className="text-sm">We&apos;ll restock soon!</p>
                     </div>
                   </div>
                 )}

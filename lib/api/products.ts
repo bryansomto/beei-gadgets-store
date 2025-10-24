@@ -20,8 +20,8 @@ interface GetProductsResponse {
 }
 
 const DEFAULT_LIMIT = 12;
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 1000; // 1 second
+// const MAX_RETRIES = 2;
+// const RETRY_DELAY = 1000; // 1 second
 
 /**
  * Fetches products from the API with advanced filtering, sorting, and pagination

@@ -10,7 +10,6 @@ import Link from "next/link";
 export function Cart() {
   const {
     cartItems,
-    addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,

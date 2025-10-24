@@ -38,7 +38,7 @@ const getButtonProps = (
   isLoading: boolean,
   className?: string
 ) => {
-  const { onAuthStart, onAuthEnd, callbackUrl, ...buttonProps } = props;
+  const { ...buttonProps } = props;
   return {
     ...buttonProps,
     className: cn(
@@ -60,7 +60,6 @@ export const SignInButton = ({
 }: AuthButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
 
   const buttonProps = getButtonProps(props, isLoading, className);
 
@@ -78,7 +77,7 @@ export const SignInButton = ({
         clearGuestCart();
       }
       await signIn(undefined, { callbackUrl: callbackUrl || "/" });
-    } catch (error) {
+    } catch {
       toast({
         title: "Sign in failed",
         description: "An error occurred during sign in",
@@ -126,7 +125,7 @@ export const SignInButtonWithGoogle = ({
         clearGuestCart();
       }
       await signIn("google", { callbackUrl: callbackUrl || "/" });
-    } catch (error) {
+    } catch {
       toast({
         title: "Google sign in failed",
         description: "An error occurred during Google sign in",
@@ -154,7 +153,6 @@ export const SignOutButton = ({
   onAuthStart,
   onAuthEnd,
   className,
-  clearCart,
   cartItems = [],
   syncCartToDB,
   ...props
@@ -188,7 +186,7 @@ export const SignOutButton = ({
       });
 
       router.refresh();
-    } catch (error) {
+    } catch {
       toast({
         title: "Sign out failed",
         description: "An error occurred during sign out",

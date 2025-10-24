@@ -1,9 +1,10 @@
+"use client";
+
 import { useEffect, useState, ChangeEvent } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { ReactSortable } from "react-sortablejs";
 import { HashLoader } from "react-spinners";
-import { useRouter } from "next/navigation";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -26,6 +27,8 @@ import colors from "@/lib/colors/swalAlerts";
 import { ProductFormData, productSchema } from "@/lib/validation/productSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import Image from "next/image";
 
 interface Category {
   _id: string;
@@ -48,7 +51,7 @@ interface ProductFormProps {
   images?: string[];
   category?: string;
   properties?: Record<string, string>;
-  onSave?: (data: ProductFormData) => void; // Optional callback
+  onSave?: (data: ProductFormData) => void;
 }
 
 export default function ProductForm({
@@ -61,7 +64,6 @@ export default function ProductForm({
   properties: assignedProperties = {},
   onSave,
 }: ProductFormProps) {
-  const router = useRouter();
   const form = useForm<ProductFormData>({
     defaultValues: {
       name: existingName,
@@ -78,10 +80,7 @@ export default function ProductForm({
   });
 
   const {
-    control,
-    handleSubmit,
     setValue,
-    register,
     watch,
     formState: { errors },
   } = form;
@@ -91,75 +90,61 @@ export default function ProductForm({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   useEffect(() => {
-    axios.get<Category[]>("/api/categories").then((result) => {
-      setCategories(result.data);
-    });
+    void (async () => {
+      try {
+        const result = await axios.get<Category[]>("/api/categories");
+        setCategories(result.data);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    })();
   }, []);
 
   const propertiesToFill: Property[] = [];
-  if (categories.length > 0 && form.watch("category")) {
-    let catInfo = categories.find(({ _id }) => _id === form.watch("category"));
-    if (catInfo) {
+  const selectedCategory = form.watch("category");
+
+  if (categories.length > 0 && selectedCategory) {
+    let catInfo = categories.find(({ _id }) => _id === selectedCategory);
+    while (catInfo) {
       propertiesToFill.push(...catInfo.properties);
-      while (catInfo?.parent?._id) {
-        const parentCat = categories.find(
-          ({ _id }) => _id === catInfo?.parent?._id
-        );
-        if (parentCat) {
-          propertiesToFill.push(...parentCat.properties);
-          catInfo = parentCat;
-        }
-      }
+      catInfo = catInfo.parent
+        ? categories.find(({ _id }) => _id === catInfo?.parent?._id)
+        : undefined;
     }
   }
 
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
     try {
-      const payload = {
-        ...data,
-        price:
-          typeof data.price === "string" ? parseFloat(data.price) : data.price,
-      };
-
-      // 2. Format properties
       const formattedProperties = Object.entries(data.properties || {}).map(
         ([name, value]) => ({
           name: name.trim(),
           values: Array.isArray(value)
-            ? value.map((v) => v.trim()).filter((v) => v)
-            : [String(value).trim()].filter((v) => v),
+            ? value.map((v) => v.trim()).filter(Boolean)
+            : [String(value).trim()].filter(Boolean),
         })
       );
 
-      // 3. Prepare complete product data
       const productData = {
         name: data.name.trim(),
         category: data.category,
         description: data.description.trim(),
         price: typeof data.price === "number" ? data.price : 0,
-        // priceVariants: completePriceVariants,
         images: data.images || [],
         properties: formattedProperties,
-        ...(_id && { _id }), // Only include _id if it exists
+        ...(_id && { _id }),
       };
 
-      // 4. Validate required fields
-      if (!productData.name) {
-        throw new Error("Product name is required");
-      }
-      if (!productData.category) {
-        throw new Error("Category is required");
-      }
-      if (productData.images.length === 0) {
+      if (!productData.name) throw new Error("Product name is required");
+      if (!productData.category) throw new Error("Category is required");
+      if (productData.images.length === 0)
         throw new Error("At least one image is required");
+
+      if (_id) {
+        await axios.put("/api/products", productData);
+      } else {
+        await axios.post("/api/products", productData);
       }
 
-      // 5. Make API request
-      const response = _id
-        ? await axios.put("/api/products", productData)
-        : await axios.post("/api/products", productData);
-
-      // 6. Show success message
       await Swal.fire({
         icon: "success",
         title: "Product saved!",
@@ -167,37 +152,32 @@ export default function ProductForm({
         timer: 1500,
       });
 
-      // 7. Execute onSave callback with properly typed properties
       if (onSave) {
         onSave({
           ...productData,
           properties: productData.properties.map((p) => ({
             name: p.name,
-            values: p.values, // Already in string[] format
+            values: p.values,
           })),
         });
       }
 
-      // 8. Reset form for new products
       if (!_id) {
         setTimeout(() => {
           form.reset();
           setValue("images", []);
-          // setValue("priceVariants", []);
         }, 1600);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error saving product:", error);
 
       let errorMessage = "Failed to save product. Please try again.";
 
-      // Type-safe error handling
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === "string") {
-        errorMessage = error;
       } else if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || error.message;
+        const axiosError = error as AxiosError<{ message?: string }>;
+        errorMessage = axiosError.response?.data?.message ?? axiosError.message;
       }
 
       await Swal.fire({
@@ -209,7 +189,7 @@ export default function ProductForm({
     }
   };
 
-  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+  function handleDrop(e: React.DragEvent<HTMLDivElement>): void {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
     const fileInput = {
@@ -217,54 +197,55 @@ export default function ProductForm({
         files,
       },
     } as unknown as ChangeEvent<HTMLInputElement>;
-    uploadImages(fileInput);
+    void uploadImages(fileInput);
   }
 
-  async function uploadImages(ev: ChangeEvent<HTMLInputElement>) {
+  const uploadImages = async (ev: ChangeEvent<HTMLInputElement>) => {
     const files = ev.target?.files;
-    if ((files ?? []).length > 0) {
-      setIsUploading(true);
-      const data = new FormData();
-      for (const file of files || []) {
-        data.append("file", file);
-      }
+    if (!files?.length) return;
 
-      try {
-        const res = await axios.post("/api/upload", data, {
-          onUploadProgress: (progressEvent) => {
-            const percent = Math.round(
-              (progressEvent.loaded * 100) / (progressEvent.total || 1)
-            );
-            setUploadProgress(percent);
-          },
-        });
-        setValue("images", [...watch("images"), ...res.data.links]);
-        Swal.fire({
-          title: "Upload Complete",
-          text: "Image successfully uploaded",
-          icon: "success",
-          confirmButtonColor: colors.green,
-        });
-      } catch (err) {
-        console.error("Upload error", err);
-        Swal.fire({
-          title: "Upload failed",
-          text: "Please try again",
-          icon: "error",
-          confirmButtonColor: colors.red,
-        });
-      } finally {
-        setIsUploading(false);
-        setUploadProgress(0);
-      }
+    setIsUploading(true);
+    const data = new FormData();
+    for (const file of files) {
+      data.append("file", file);
     }
-  }
 
-  function updateImagesOrder(images: string[]) {
+    try {
+      const res = await axios.post<{ links: string[] }>("/api/upload", data, {
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || 1)
+          );
+          setUploadProgress(percent);
+        },
+      });
+
+      setValue("images", [...watch("images"), ...res.data.links]);
+      void Swal.fire({
+        title: "Upload Complete",
+        text: "Image successfully uploaded",
+        icon: "success",
+        confirmButtonColor: colors.green,
+      });
+    } catch (err) {
+      console.error("Upload error", err);
+      void Swal.fire({
+        title: "Upload failed",
+        text: "Please try again",
+        icon: "error",
+        confirmButtonColor: colors.red,
+      });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  function updateImagesOrder(images: string[]): void {
     setValue("images", images);
   }
 
-  async function handleImageDelete(imageUrl: string) {
+  async function handleImageDelete(imageUrl: string): Promise<void> {
     const confirm = await Swal.fire({
       title: "Delete this image?",
       text: "This action cannot be undone.",
@@ -281,11 +262,9 @@ export default function ProductForm({
         data: { url: imageUrl },
       });
 
-      const updatedImages: string[] = watch("images").filter(
-        (img: string) => img !== imageUrl
-      );
+      const updatedImages = watch("images").filter((img) => img !== imageUrl);
       setValue("images", updatedImages);
-      Swal.fire({
+      void Swal.fire({
         title: "Deleted",
         text: "Image has been removed.",
         icon: "success",
@@ -293,7 +272,7 @@ export default function ProductForm({
       });
     } catch (error) {
       console.error("Delete error:", error);
-      Swal.fire("Error!", "Failed to delete image.", "error");
+      void Swal.fire("Error!", "Failed to delete image.", "error");
     }
   }
 
@@ -378,7 +357,7 @@ export default function ProductForm({
         <FormField
           control={form.control}
           name="images"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Photos</FormLabel>
               <FormControl>
@@ -402,10 +381,12 @@ export default function ProductForm({
                         key={`image-${link}-${index}`}
                         className="relative h-24 w-24 bg-white p-1 rounded-sm shadow-sm border border-gray-200"
                       >
-                        <img
+                        <Image
                           src={link}
                           alt=""
                           className="object-cover h-full w-full"
+                          width={96}
+                          height={96}
                         />
                         <button
                           type="button"
@@ -432,7 +413,13 @@ export default function ProductForm({
                       className="hidden"
                     />
                     {isUploading ? (
-                      <HashLoader size={24} />
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <HashLoader size={24} />
+                        <Progress value={uploadProgress} className="w-24 h-2" />
+                        <span className="text-xs text-muted-foreground">
+                          {uploadProgress}%
+                        </span>
+                      </div>
                     ) : (
                       <>
                         <PlusIcon className="h-6 w-6" />

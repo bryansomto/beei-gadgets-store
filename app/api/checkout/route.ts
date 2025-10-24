@@ -1,7 +1,7 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { Order } from "@/models/Order";
 import { auth } from "@/auth";
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 interface OrderItem {
   productId: string;
@@ -31,14 +31,13 @@ interface CreateOrderRequest {
 }
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-const PAYSTACK_PUBLIC_KEY = process.env.PAYSTACK_PUBLIC_KEY;
 
 export async function GET() {
   try {
     await mongooseConnect();
     const orders = await Order.find().sort({ createdAt: -1 });
     return NextResponse.json(orders);
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Failed to fetch orders:", err);
     return NextResponse.json(
       { error: "Failed to fetch orders" },
@@ -56,7 +55,6 @@ async function initializePaystackPayment(
   paymentMethod: string
 ) {
   try {
-    // Amount in kobo (smallest unit in NGN)
     const amountInKobo = Math.round(amount * 100);
 
     const payload = {
@@ -87,9 +85,14 @@ async function initializePaystackPayment(
     }
 
     return data.data;
-  } catch (error: any) {
-    console.error("Paystack initialization error:", error);
-    throw new Error(error.message || "Payment initialization failed");
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Paystack initialization error:", error.message);
+      throw new Error(error.message);
+    } else {
+      console.error("Unknown Paystack initialization error:", error);
+      throw new Error("Payment initialization failed");
+    }
   }
 }
 
@@ -106,17 +109,11 @@ export async function POST(req: NextRequest) {
     }: CreateOrderRequest = await req.json();
 
     if (!session?.user?.email || session.user.email !== userEmail) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     if (!items?.length || total <= 0 || !address || !paymentMethod) {
-      return NextResponse.json(
-        { error: "Invalid order data" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid order data" }, { status: 400 });
     }
 
     if (!PAYSTACK_SECRET_KEY) {
@@ -125,7 +122,6 @@ export async function POST(req: NextRequest) {
 
     await mongooseConnect();
 
-    // Create Order
     const order = new Order({
       userEmail,
       userName,
@@ -138,12 +134,8 @@ export async function POST(req: NextRequest) {
     });
 
     await order.save();
-    console.log("Order created:", order._id);
-    console.log(order);
 
-    // Handle payment method
     if (paymentMethod === "call_rep") {
-      // For call_rep, no payment processing needed
       return NextResponse.json({
         success: true,
         orderId: order._id,
@@ -151,8 +143,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Initialize Paystack payment for debit_card and bank_transfer
-    const orderId = order._id ? order._id.toString() : order.id;
+    const orderId = order._id?.toString() || order.id;
     const paystackData = await initializePaystackPayment(
       total,
       address.email,
@@ -170,13 +161,16 @@ export async function POST(req: NextRequest) {
       reference: paystackData.reference,
       message: "Payment initialized successfully",
     });
-  } catch (error: any) {
-    console.error("Checkout error:", error);
+  } catch (error: unknown) {
+    let message = "Checkout failed";
+    if (error instanceof Error) message = error.message;
+
+    console.error("Checkout error:", message);
 
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Checkout failed",
+        error: message,
         message: "Please try again or contact support",
       },
       { status: 500 }

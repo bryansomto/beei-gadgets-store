@@ -38,7 +38,7 @@ export function SignUpForm() {
   const onSubmit = async (data: SignUpFormValues) => {
     setIsLoading(true);
     try {
-      const response = await axios.post("/api/register", {
+      await axios.post("/api/register", {
         firstName:
           data.firstName.charAt(0).toUpperCase() + data.firstName.slice(1),
         lastName:
@@ -54,15 +54,23 @@ export function SignUpForm() {
 
       // Redirect to login or dashboard after successful registration
       router.push("/login");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration error:", error);
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description:
-          error.response?.data?.message ||
-          "An error occurred during registration",
-      });
+      if (axios.isAxiosError(error) && error.response) {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description:
+            error.response.data.message ||
+            "An error occurred during registration",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: "An unexpected error occurred",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

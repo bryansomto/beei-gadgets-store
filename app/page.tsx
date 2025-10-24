@@ -1,44 +1,29 @@
-"use client";
-
 import { Icons } from "@/components/Icons";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import Phone from "@/components/Phone";
-import { Reviews } from "@/components/Reviews";
-import { buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Check, Star } from "lucide-react";
-import Link from "next/link";
-import { auth } from "@/auth";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { Check, Star } from "lucide-react";
+import React from "react";
 import ProductGrid from "@/components/ProductGrid";
+import Image from "next/image";
 
-export default function Home() {
-  const [products, setProducts] = useState<any[]>([]);
+async function fetchProducts() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/products`,
+    {
+      cache: "no-store", // ensures fresh data each load
+    }
+  );
 
-  useEffect(() => {
-    // Fetch products on component mount (or use getServerSideProps for server-side)
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("/api/products");
-        setProducts(response.data); // assuming response is an array of products
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-      }
-    };
+  if (!res.ok) throw new Error("Failed to fetch products");
+  return res.json();
+}
 
-    fetchProducts();
-  }, []);
+export default async function Home() {
+  const products = await fetchProducts();
 
   return (
     <div className="bg-slate-50 dark:bg-zinc-900 flex flex-col space-y-24 sm:space-y-30 pt-12 md:pt-20">
-      {/* <h2 className="absolute top-1/2 left1/2 transform -translate-x-1/2 -translate-y-1/2 order-1 mt-2 tracking-tight text-center text-balance !leading-tight font-bold text-5xl md:text-6xl text-gray-900">
-          Featured Products
-        </h2> */}
       <MaxWidthWrapper>
         <div className="relative mx-auto text-center lg:text-left flex flex-col items-center lg:items-start">
-          {/* <div className="absolute w-28 left-0 -top-20 hidden lg:block">
-                <img src="/beei-1.png" className="w-full" />
-              </div> */}
           <h1 className="relative w-fit tracking-tight text-balance font-bold !leading-tight text-gray-900 dark:text-gray-100 text-5xl md:text-6xl lg:text-7xl">
             Your one-stop{" "}
             <span className="bg-green-600 px-2 text-gray-100">Gadget</span> shop
@@ -64,30 +49,40 @@ export default function Home() {
           </ul>
           <div className="mt-12 flex flex-col sm:flex-row items-center sm:items-start gap-5">
             <div className="flex -space-x-4">
-              <img
-                className="inline-block h-10 w-10 rounded-full ring-2 ring-slate-100"
+              <Image
                 src="/users/user-1.png"
                 alt="user image"
-              />
-              <img
+                width={40}
+                height={40}
                 className="inline-block h-10 w-10 rounded-full ring-2 ring-slate-100"
+              />
+              <Image
                 src="/users/user-2.png"
                 alt="user image"
-              />
-              <img
+                width={40}
+                height={40}
                 className="inline-block h-10 w-10 rounded-full ring-2 ring-slate-100"
+              />
+              <Image
                 src="/users/user-3.png"
                 alt="user image"
-              />
-              <img
+                width={40}
+                height={40}
                 className="inline-block h-10 w-10 rounded-full ring-2 ring-slate-100"
+              />
+              <Image
                 src="/users/user-4.jpg"
                 alt="user image"
+                width={40}
+                height={40}
+                className="inline-block h-10 w-10 rounded-full ring-2 ring-slate-100"
               />
-              <img
-                className="inline-block object-cover h-10 w-10 rounded-full ring-2 ring-slate-100"
+              <Image
                 src="/users/user-5.jpg"
                 alt="user image"
+                width={40}
+                height={40}
+                className="inline-block object-cover h-10 w-10 rounded-full ring-2 ring-slate-100"
               />
             </div>
             <div className="flex flex-col justify-between items-center sm:items-start">
@@ -170,7 +165,6 @@ export default function Home() {
               </span>
               say
             </h2>
-            {/* <img src="/beei-1.png" className="w-24 order-0 lg:order-2" /> */}
           </div>
 
           <div className="mx-auto grid max-w-2xl grid-cols-1 px-4 lg:mx-0 lg:max-w-none lg:grid-cols-2 gap-y-16">
@@ -184,15 +178,17 @@ export default function Home() {
               </div>
               <div className="text-lg leading-8">
                 <p>
-                  "Solid design, long-lasting battery. Applications runs smooth
-                  withouts lags or heating up the device."
+                  &quot;Solid design, long-lasting battery. Applications runs
+                  smooth withouts lags or heating up the device.&quot;
                 </p>
               </div>
               <div className="flex gap-4 mt-2">
-                <img
+                <Image
                   className="rounded-full h-12 w-12 object-coover"
                   src="/users/user-1.png"
                   alt="user"
+                  width={48}
+                  height={48}
                 />
                 <div className="flex flex-col">
                   <p className="font-semibold">Jonathan</p>
@@ -214,20 +210,22 @@ export default function Home() {
               </div>
               <div className="text-lg leading-8">
                 <p>
-                  I've always wanted to own the Samsung S series, and starting
-                  off with the all new S25 ultra is a really big deal for me.
-                  The Galaxy AI is so handy. It is practically the fastest
-                  mobile device on the planet - LOL. I especially love how
-                  seamless the process was, from purchase to delivery - thank
-                  you BeeiGadgets.
+                  I&apos;ve always wanted to own the Samsung S series, and
+                  starting off with the all new S25 ultra is a really big deal
+                  for me. The Galaxy AI is so handy. It is practically the
+                  fastest mobile device on the planet - LOL. I especially love
+                  how seamless the process was, from purchase to delivery -
+                  thank you BeeiGadgets.
                 </p>
               </div>
               <div className="flex gap-4 mt-2">
                 {" "}
-                <img
-                  className="rounded-full h-12 w-12 object-coover"
+                <Image
                   src="/users/user-4.jpg"
                   alt="user"
+                  width={48}
+                  height={48}
+                  className="rounded-full h-12 w-12 object-coover"
                 />
                 <div className="flex flex-col">
                   <p className="font-semibold">Bryan</p>
