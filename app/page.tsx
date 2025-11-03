@@ -67,7 +67,7 @@ export default async function Home() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 >
                   <Link href="/products">Shop All Products</Link>
                 </Button>

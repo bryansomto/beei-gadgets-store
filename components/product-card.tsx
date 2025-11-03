@@ -74,8 +74,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-4 pt-0">
         <Button
-          className="w-full dark:text-gray-100"
-          disabled={(product.stock ?? 0) <= 0 || isLoading || isAdding}
+          className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+          // disabled={(product.stock ?? 0) <= 0 || isLoading || isAdding}
           onClick={handleAddToCart}
           aria-label="Add to cart"
         >

@@ -357,7 +357,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
                     size="lg"
-                    className="flex-1 h-12 sm:h-14 text-base font-semibold gap-3 bg-primary hover:bg-primary/90"
+                    className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                     disabled={isOutOfStock || isLoading || isAdding}
                     onClick={handleAddToCart}
                     aria-label="Add to cart"
