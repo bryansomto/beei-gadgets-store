@@ -111,28 +111,89 @@ export default function ProductGrid({
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
+      <section className="px-4 py-8 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* Header skeleton */}
+        <div className="flex justify-between items-center mb-2">
           <Skeleton className="h-8 w-48 dark:bg-zinc-800" />
-          {title === "New arrivals" && (
-            <Skeleton className="h-4 w-20 dark:bg-zinc-800" />
-          )}
+          <Skeleton className="h-4 w-20 dark:bg-zinc-800" />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {Array.from({ length: limit }).map((_, i) => (
-            <Card key={i} className="overflow-hidden dark:bg-zinc-900">
-              <div className="flex flex-col h-full">
-                <Skeleton className="aspect-square w-full dark:bg-zinc-800" />
-                <div className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-full dark:bg-zinc-800" />
-                  <Skeleton className="h-4 w-1/2 dark:bg-zinc-800" />
-                  <Skeleton className="h-8 w-full mt-4 dark:bg-zinc-800" />
+
+        <div className="relative w-full mb-6" aria-hidden="true">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+          </div>
+        </div>
+
+        {/* Different skeleton layouts based on title */}
+        {title === "New arrivals" ? (
+          // Swiper-style skeleton for New arrivals
+          <div className="relative">
+            <div className="flex gap-6 overflow-hidden pb-12">
+              {Array.from({ length: Math.min(limit, 3) }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-[0_0_calc(100%-48px)] md:flex-[0_0_calc(50%-24px)] lg:flex-[0_0_calc(33.333%-32px)]"
+                >
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full dark:bg-zinc-900 dark:border-zinc-800 md:p-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 h-full">
+                      {/* Image skeleton */}
+                      <div className="relative md:col-span-1 aspect-square bg-gray-50 dark:bg-zinc-800">
+                        <Skeleton className="w-full h-full dark:bg-zinc-800" />
+                      </div>
+
+                      {/* Content skeleton */}
+                      <div className="p-6 flex flex-col md:col-span-2">
+                        <div className="flex-1">
+                          <Skeleton className="h-6 w-3/4 mb-2 dark:bg-zinc-800" />
+                          <div className="flex items-center gap-2 mb-3">
+                            <Skeleton className="h-4 w-16 dark:bg-zinc-800" />
+                            <Skeleton className="h-4 w-20 dark:bg-zinc-800" />
+                          </div>
+                          <Skeleton className="h-4 w-full mb-1 dark:bg-zinc-800" />
+                          <Skeleton className="h-4 w-2/3 mb-4 dark:bg-zinc-800" />
+                        </div>
+
+                        <div className="flex items-center justify-between mt-auto">
+                          <Skeleton className="h-6 w-20 dark:bg-zinc-800" />
+                          <Skeleton className="h-10 w-10 rounded-md dark:bg-zinc-800" />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+              ))}
+            </div>
+            {/* Swiper pagination skeleton */}
+            <div className="flex justify-center gap-2 mt-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  className="h-2 w-2 rounded-full dark:bg-zinc-800"
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          // Grid skeleton for other sections
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {Array.from({ length: limit }).map((_, i) => (
+              <Card key={i} className="overflow-hidden dark:bg-zinc-900">
+                <div className="flex flex-col h-full">
+                  <Skeleton className="aspect-square w-full dark:bg-zinc-800" />
+                  <div className="p-4 space-y-2 flex-1 flex flex-col">
+                    <Skeleton className="h-4 w-full dark:bg-zinc-800" />
+                    <Skeleton className="h-4 w-1/2 dark:bg-zinc-800" />
+                    <div className="mt-auto space-y-2">
+                      <Skeleton className="h-4 w-1/3 dark:bg-zinc-800" />
+                      <Skeleton className="h-8 w-full dark:bg-zinc-800" />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
     );
   }
 
@@ -178,7 +239,6 @@ export default function ProductGrid({
             breakpoints={{
               768: { slidesPerView: 1.5 },
               1280: { slidesPerView: 2 },
-              // 1440: { slidesPerView: 3 },
             }}
             className="!pb-12"
           >
@@ -293,7 +353,6 @@ export default function ProductGrid({
                             disabled={isLoading}
                           >
                             <FaCartPlus className="h-4 w-4" />
-                            {/* Add to Cart */}
                           </Button>
                         </div>
                       </div>
