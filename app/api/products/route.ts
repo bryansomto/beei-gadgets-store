@@ -147,6 +147,16 @@ export async function POST(req: NextRequest) {
       stock: body.stock || 0,
     });
 
+    // Trigger revalidation
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/revalidate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "/", // Revalidate homepage
+        secret: process.env.REVALIDATION_SECRET,
+      }),
+    });
+
     return NextResponse.json(newProduct, { status: 201 });
 
   } catch (error) {
@@ -205,6 +215,16 @@ export async function PUT(req: NextRequest) {
       { new: true, runValidators: true }
     ).populate('category');
 
+    // Trigger revalidation
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/revalidate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "/", // Revalidate homepage
+        secret: process.env.REVALIDATION_SECRET,
+      }),
+    });
+
     return NextResponse.json(updatedProduct);
 
   } catch (error) {
@@ -238,6 +258,16 @@ export async function DELETE(req: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Trigger revalidation
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/revalidate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "/", // Revalidate homepage
+        secret: process.env.REVALIDATION_SECRET,
+      }),
+    });
 
     return NextResponse.json(
       { message: "Product deleted successfully" },

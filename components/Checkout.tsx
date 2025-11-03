@@ -235,7 +235,7 @@ export default function CheckoutPage() {
         toast.dismiss(verifyingToast);
         toast.success("Payment verified! 🎉");
         await clearCart();
-        router.push(`/order/confirmation/${orderId}`);
+        router.push(`/orders/confirmation/${orderId}`);
       } else {
         toast.dismiss(verifyingToast);
         toast.error(verifyRes.data.message || "Payment verification failed");
@@ -325,7 +325,7 @@ export default function CheckoutPage() {
         // ✅ Use openIframe, not chargeCustomer
         paystack.openIframe();
       } else if (paymentMethod === "call_rep") {
-        router.push(`/order/confirmation/${orderData.orderId}`);
+        router.push(`/orders/confirmation/${orderData.orderId}`);
         toast.success(
           "Order placed successfully! Our representative will call you shortly."
         );

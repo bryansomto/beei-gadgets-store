@@ -1,4 +1,5 @@
 import { Schema, model, models, Document, Model } from 'mongoose';
+import { Counter } from './Counter';
 
 // Interface for Order Items
 interface IOrderItem {
@@ -22,6 +23,7 @@ interface IAddress {
 
 // Interface for the Order Document
 interface IOrder extends Document {
+  orderNumber: string;
   userEmail: string;
   items: IOrderItem[];
   total: number;
@@ -29,10 +31,15 @@ interface IOrder extends Document {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paid: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 // Order Schema
 const OrderSchema = new Schema<IOrder>({
+    orderNumber: {
+      type: String,
+      unique: true,
+    },
   userEmail: { 
     type: String, 
     required: [true, 'User email is required'],
@@ -158,6 +165,40 @@ OrderSchema.virtual('createdAtFormatted').get(function(this: IOrder) {
 OrderSchema.index({ userEmail: 1 });
 OrderSchema.index({ status: 1 });
 OrderSchema.index({ createdAt: -1 });
+
+
+// ✅ Auto-generate unique order number
+// OrderSchema.pre<IOrder>("save", async function (next) {
+//   if (this.isNew && !this.orderNumber) {
+//     const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+//     const count = await (this.constructor as Model<IOrder>).countDocuments({
+//       createdAt: {
+//         $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+//         $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+//       },
+//     });
+
+//     const sequence = String(count + 1).padStart(4, "0");
+//     this.orderNumber = `ORD-${datePart}-${sequence}`;
+//   }
+//   next();
+// });
+
+OrderSchema.pre<IOrder>("save", async function (next) {
+  if (this.isNew && !this.orderNumber) {
+    console.log("⚙️ Generating order number...");
+    const counter = await Counter.findOneAndUpdate(
+      { name: "orderNumber" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+
+    const sequence = String(counter.seq).padStart(6, "0"); // e.g. 000001
+    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // e.g. 20251029
+    this.orderNumber = `ORD-${datePart}-${sequence}`;
+  }
+  next();
+});
 
 // Pre-save hook to calculate total if not provided
 OrderSchema.pre<IOrder>('save', function(next) {

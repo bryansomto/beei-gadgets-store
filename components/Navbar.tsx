@@ -124,7 +124,7 @@ const Navbar = () => {
                       <Link
                         href="/wishlist"
                         onClick={toggleMenu}
-                        className="flex items-center py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors gap-1"
+                        className="flex text-sm items-center py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors gap-1"
                       >
                         Wishlist
                         {getWishlistCount() > 0 && (
@@ -132,6 +132,13 @@ const Navbar = () => {
                             {getWishlistCount()}
                           </span>
                         )}
+                      </Link>
+                      <Link
+                        href="/orders"
+                        onClick={toggleMenu}
+                        className="flex text-sm items-center py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors gap-1"
+                      >
+                        My Orders
                       </Link>
                       {isAdmin && (
                         <Link
@@ -267,6 +274,13 @@ const Navbar = () => {
                       {getWishlistCount()}
                     </span>
                   )}
+                </Link>
+                <Link
+                  href="/orders"
+                  onClick={toggleMenu}
+                  className="flex items-center py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors gap-1"
+                >
+                  My Orders
                 </Link>
                 {isAdmin && (
                   <Link
