@@ -357,7 +357,10 @@ export default function CheckoutPage() {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4">
         <h1 className="text-2xl font-bold">Your cart is empty</h1>
-        <Button onClick={() => router.push("/products")}>
+        <Button
+          onClick={() => router.push("/products")}
+          className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+        >
           Continue Shopping
         </Button>
       </div>
@@ -582,7 +585,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full gap-2"
+                  className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 >
                   {isSubmitting ? (
                     <>
@@ -602,7 +605,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full gap-2"
+                  className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 >
                   {isSubmitting ? (
                     <>
@@ -622,7 +625,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || !isWorkHours}
-                  className="w-full gap-2"
+                  className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 >
                   {isSubmitting ? (
                     <>

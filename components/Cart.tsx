@@ -148,7 +148,10 @@ export function Cart() {
             </div>
 
             <div className="space-y-3">
-              <Button className="w-full h-12 text-base font-semibold" asChild>
+              <Button
+                className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+                asChild
+              >
                 <Link href="/cart/checkout">Proceed to Checkout</Link>
               </Button>
 

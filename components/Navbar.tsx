@@ -17,6 +17,7 @@ const Navbar = () => {
   const { cartCount, cartItems, syncCartToDB } = useCart();
   const { getWishlistCount } = useWishlist();
   const [isOpen, setIsOpen] = useState(false);
+  const isDisabled = true;
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -62,13 +63,23 @@ const Navbar = () => {
             </Link>
             <Link
               href="/about"
-              className="text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              className={`
+    text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors
+    ${isDisabled ? "pointer-events-none opacity-50 cursor-not-allowed" : ""}
+  `}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : undefined}
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              className={`
+    text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors
+    ${isDisabled ? "pointer-events-none opacity-50 cursor-not-allowed" : ""}
+  `}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : undefined}
             >
               Contact
             </Link>
@@ -229,28 +240,38 @@ const Navbar = () => {
             <Link
               href="/"
               onClick={toggleMenu}
-              className="block py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
+              className="block py-1 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
             >
               Home
             </Link>
             <Link
               href="/products"
               onClick={toggleMenu}
-              className="block py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
+              className="block py-1 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
             >
               Products
             </Link>
             <Link
               href="/about"
               onClick={toggleMenu}
-              className="block py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
+              className={`
+    block px-2 py-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors
+    ${isDisabled ? "pointer-events-none opacity-50 cursor-not-allowed" : ""}
+  `}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : undefined}
             >
               About
             </Link>
             <Link
               href="/contact"
               onClick={toggleMenu}
-              className="block py-2 text-gray-700 hover:text-black hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-zinc-900 px-2 rounded transition-colors"
+              className={`
+    block px-2 py-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors
+    ${isDisabled ? "pointer-events-none opacity-50 cursor-not-allowed" : ""}
+  `}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : undefined}
             >
               Contact
             </Link>

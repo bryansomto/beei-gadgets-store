@@ -266,7 +266,10 @@ export default async function OrderConfirmationPage(props: {
               <h2 className="text-xl font-semibold">Order Actions</h2>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button asChild className="w-full gap-2">
+              <Button
+                asChild
+                className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100 "
+              >
                 <Link href="/products">
                   <Home className="h-4 w-4" />
                   Continue Shopping
