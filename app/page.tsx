@@ -21,7 +21,7 @@ async function fetchProducts() {
     return res.json();
   } catch (error) {
     console.error("Error fetching products:", error);
-    return []; // Return empty array instead of throwing
+    return [];
   }
 }
 
