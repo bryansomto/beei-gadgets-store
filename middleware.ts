@@ -23,7 +23,11 @@ export async function middleware(req: NextRequest) {
     return response; // Return the modified response
   }
 
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+ const token = await getToken({
+  req,
+  secret: process.env.AUTH_SECRET,
+  secureCookie: process.env.NODE_ENV === "production"
+});
 
   // Redirect to home if not authenticated
   if (!token?.email) {
