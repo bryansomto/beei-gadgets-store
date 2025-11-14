@@ -76,12 +76,12 @@ export default function ProductPageClient({ product }: { product: Product }) {
   const toggleWishlist = useCallback(() => {
     setIsWishlisted(!isWishlisted);
     toast({
-      title: isWishlisted ? "Removed from wishlist" : "Added to wishlist",
+      title: "Success",
       description: isWishlisted
-        ? "Product removed from your wishlist."
-        : "Product added to your wishlist.",
+        ? `${product.name} removed from wishlist`
+        : `${product.name} added to wishlist`,
     });
-  }, [isWishlisted, toast]);
+  }, [isWishlisted, toast, product]);
 
   const shareProduct = useCallback(async () => {
     if (navigator.share) {
@@ -292,7 +292,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
                     variant="ghost"
                     size="icon"
                     onClick={toggleWishlist}
-                    className="flex-shrink-0 h-10 w-10 rounded-full"
+                    className="flex-shrink-0 h-10 w-10 rounded-full bg-white/90 hover:bg-white dark:bg-zinc-800/90 dark:hover:bg-zinc-800 shadow-md backdrop-blur-sm transition-colors"
                     aria-label={
                       isWishlisted ? "Remove from wishlist" : "Add to wishlist"
                     }

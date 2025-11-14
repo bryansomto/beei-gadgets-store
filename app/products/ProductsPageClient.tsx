@@ -207,7 +207,11 @@ export default function ProductsPageClient() {
                 variant={viewMode === "grid" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("grid")}
-                className="h-9 w-9 p-0"
+                className={
+                  viewMode === "grid"
+                    ? "h-9 w-9 p-0 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+                    : "h-9 w-9 p-0"
+                }
               >
                 <Grid3X3 className="h-4 w-4" />
               </Button>
@@ -215,7 +219,11 @@ export default function ProductsPageClient() {
                 variant={viewMode === "list" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("list")}
-                className="h-9 w-9 p-0"
+                className={
+                  viewMode === "list"
+                    ? "h-9 w-9 p-0 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+                    : "h-9 w-9 p-0"
+                }
               >
                 <List className="h-4 w-4" />
               </Button>

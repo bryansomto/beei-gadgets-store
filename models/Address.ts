@@ -6,8 +6,8 @@ interface IAddress extends Document {
   name: string;
   phone: string;
   city: string;
-  state?: string;  // Optional field
-  postalCode: string;
+  state: string;
+  postalCode?: string;
   streetAddress: string;
   country: string;
   createdAt: Date;

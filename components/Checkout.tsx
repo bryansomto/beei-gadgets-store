@@ -359,7 +359,7 @@ export default function CheckoutPage() {
         <h1 className="text-2xl font-bold">Your cart is empty</h1>
         <Button
           onClick={() => router.push("/products")}
-          className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+          className="text-sm lg:text-base gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
         >
           Continue Shopping
         </Button>

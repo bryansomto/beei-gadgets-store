@@ -223,6 +223,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           3000,
           "Add to cart operation timed out"
         );
+        toast({
+          title: "Success",
+          description: `${product.name} added to cart.`,
+        });
 
         await syncCartToDB(newItems);
       } catch (error) {
@@ -254,9 +258,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
           3000,
           "Remove from cart operation timed out"
         );
+        toast({
+          title: "Success",
+          description: "Item removed from cart.",
+        });
       } catch (error) {
         console.error("Failed to remove from cart:", error);
         setError("Failed to remove item from cart");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to remove item from cart.",
+        });
       }
     },
     [syncCartToDB]

@@ -20,7 +20,10 @@ export default async function WishlistPage() {
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
           <p className="mb-4">Please sign in to view your wishlist</p>
-          <Button asChild>
+          <Button
+            asChild
+            className="text-sm lg:text-base gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+          >
             <Link href="/login">Sign In</Link>
           </Button>
         </div>
@@ -62,7 +65,10 @@ export default async function WishlistPage() {
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-8 text-center">
             <h2 className="text-xl font-bold mb-2">Your wishlist is empty</h2>
             <p className="mb-4">Save items you love to your wishlist</p>
-            <Button asChild>
+            <Button
+              asChild
+              className="text-sm lg:text-base gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+            >
               <Link href="/products">Browse Products</Link>
             </Button>
           </div>
@@ -86,7 +92,10 @@ export default async function WishlistPage() {
               ? error.message
               : "We couldn't load your wishlist. Please try again."}
           </p>
-          <Button asChild>
+          <Button
+            asChild
+            className="text-sm lg:text-base gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+          >
             <Link href="/wishlist">Retry</Link>
           </Button>
         </div>

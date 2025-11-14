@@ -3,11 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { Product } from "@/types";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
+import { useWishlist } from "@/context/WishlistContext";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +18,9 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart, isLoading } = useCart();
   const [isAdding, setIsAdding] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { toast } = useToast();
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -26,6 +31,23 @@ export function ProductCard({ product }: ProductCardProps) {
       console.error("Error adding to cart:", error);
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleWishlistClick = async (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsProcessing(true);
+    try {
+      if (isInWishlist(product._id)) {
+        await removeFromWishlist(product._id);
+        toast({ description: `${product.name} removed from wishlist` });
+      } else {
+        await addToWishlist(product._id);
+        toast({ description: `${product.name} added to wishlist` });
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -47,6 +69,26 @@ export function ProductCard({ product }: ProductCardProps) {
               </span>
             </div>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 bg-white/90 hover:bg-white dark:bg-zinc-800/90 dark:hover:bg-zinc-800 rounded-full shadow-md backdrop-blur-sm transition-colors"
+            onClick={(e) => handleWishlistClick(e, product)}
+            disabled={isProcessing}
+            aria-label={
+              isInWishlist(product._id)
+                ? "Remove from wishlist"
+                : "Add to wishlist"
+            }
+          >
+            <Heart
+              className={`h-5 w-5 transition-colors ${
+                isInWishlist(product._id)
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-600 dark:text-gray-300"
+              }`}
+            />
+          </Button>
         </div>
 
         <div className="p-4">

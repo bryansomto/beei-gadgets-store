@@ -15,7 +15,7 @@ export function Cart() {
     clearCart,
     cartTotal,
     cartCount,
-    syncCartToDB,
+    // syncCartToDB is no longer needed here, but fine to keep
   } = useCart();
 
   return (
@@ -43,7 +43,7 @@ export function Cart() {
             Your cart is empty
           </p>
           <Link href="/products">
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button className="text-xs sm:text-sm md:text-base gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100">
               Continue Shopping
             </Button>
           </Link>
@@ -55,9 +55,8 @@ export function Cart() {
             {cartItems.map((item) => (
               <div
                 key={item.productId}
-                className="flex items-center gap-4 p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                className="flex items-start gap-4 p-4 border rounded-lg bg-card transition-colors"
               >
-                {/* Product Image */}
                 <Link
                   href={`/products/${item.productId}`}
                   className="flex-shrink-0"
@@ -72,65 +71,64 @@ export function Cart() {
                     />
                   </div>
                 </Link>
-
-                {/* Product Info */}
                 <div className="flex-1 min-w-0">
-                  <Link href={`/products/${item.productId}`}>
-                    <h3 className="font-medium text-sm md:text-base line-clamp-2 hover:text-primary transition-colors">
-                      {item.name}
-                    </h3>
-                  </Link>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {formatPrice(item.price)}
-                  </p>
-                </div>
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/products/${item.productId}`}>
+                        <h3 className="font-medium text-sm md:text-base line-clamp-2 hover:text-primary transition-colors">
+                          {item.name}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-muted-foreground mt-1 sm:hidden">
+                        {formatPrice(item.price)}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+                      onClick={() => removeFromCart(item.productId)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 md:h-9 md:w-9"
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity - 1)
+                        }
+                        disabled={item.quantity <= 1}
+                      >
+                        <Minus className="h-3 w-3 md:h-4 md:w-4" />
+                      </Button>
+                      <span className="w-8 text-center font-medium text-sm md:text-base">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 md:h-9 md:w-9"
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity + 1)
+                        }
+                      >
+                        <Plus className="h-3 w-3 md:h-4 md:w-4" />
+                      </Button>
+                    </div>
 
-                {/* Quantity Controls */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 md:h-9 md:w-9"
-                    onClick={() =>
-                      updateQuantity(item.productId, item.quantity - 1)
-                    }
-                    disabled={item.quantity <= 1}
-                  >
-                    <Minus className="h-3 w-3 md:h-4 md:w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-medium text-sm md:text-base">
-                    {item.quantity}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 md:h-9 md:w-9"
-                    onClick={() =>
-                      updateQuantity(item.productId, item.quantity + 1)
-                    }
-                  >
-                    <Plus className="h-3 w-3 md:h-4 md:w-4" />
-                  </Button>
-                </div>
-
-                {/* Item Total & Remove */}
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <p className="font-semibold text-sm md:text-base whitespace-nowrap">
-                    {formatPrice((item.price * item.quantity).toFixed(2))}
-                  </p>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    onClick={async () => {
-                      if (syncCartToDB && cartItems.length > 0) {
-                        await syncCartToDB(cartItems);
-                      }
-                      await removeFromCart(item.productId);
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                    <div className="flex-shrink-0 text-right">
+                      <p className="font-semibold text-sm md:text-base whitespace-nowrap">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1 hidden sm:block">
+                        {formatPrice(item.price)} each
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -149,7 +147,7 @@ export function Cart() {
 
             <div className="space-y-3">
               <Button
-                className="text-xs sm:text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+                className="text-sm lg:text-base w-full gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 asChild
               >
                 <Link href="/cart/checkout">Proceed to Checkout</Link>

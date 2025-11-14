@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Loader2, Save, MapPin, User, Mail, Phone, Home } from "lucide-react";
-import { toast } from "react-hot-toast";
 import useUser from "@/lib/userSession";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { phoneSchema } from "@/lib/phoneSchema";
+import { useToast } from "@/components/ui/use-toast";
 
 // Define your form schemas
 const profileSchema = z.object({
@@ -103,6 +103,7 @@ export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [isAddressLoading, setIsAddressLoading] = useState(true);
+  const { toast } = useToast();
 
   const {
     control: profileControl,
@@ -235,8 +236,10 @@ export default function AccountPage() {
 
       // Update the form with the returned data
       resetProfile(response.data);
-
-      toast.success("Profile updated successfully!");
+      toast({
+        title: "Success",
+        description: "Profile updated successfully!",
+      });
     } catch (err) {
       console.error("Failed to update profile:", err);
 
@@ -249,13 +252,19 @@ export default function AccountPage() {
         ? err.response?.data?.error || err.message || "Failed to update profile"
         : "Failed to update profile";
 
-      toast.error(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+      });
     }
   };
 
   const onAddressSubmit = async (data: AddressFormData) => {
     if (!user?.email) {
-      toast.error("Please sign in to save your address");
+      toast({
+        title: "Error",
+        description: "Please sign in to save your address",
+      });
       return;
     }
 
@@ -264,15 +273,18 @@ export default function AccountPage() {
         userEmail: user.email,
         ...data,
       });
-
-      toast.success("Address updated successfully!");
+      toast({
+        title: "Success",
+        description: "Address updated successfully!",
+      });
     } catch (err) {
       console.error("Failed to save address:", err);
-      toast.error(
-        axios.isAxiosError(err)
+      toast({
+        title: "Error",
+        description: axios.isAxiosError(err)
           ? err.response?.data?.error || "Failed to save address"
-          : "Failed to save address"
-      );
+          : "Failed to save address",
+      });
     }
   };
 
@@ -281,7 +293,7 @@ export default function AccountPage() {
   }
 
   if (!isAuthenticated) {
-    return null; // Will redirect due to useEffect
+    return null;
   }
 
   return (
@@ -394,7 +406,7 @@ export default function AccountPage() {
                 <Button
                   type="submit"
                   disabled={isProfileSubmitting}
-                  className="gap-2"
+                  className="gap-2 text-sm lg:text-base bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 >
                   {isProfileSubmitting ? (
                     <>
@@ -548,7 +560,7 @@ export default function AccountPage() {
                 <Button
                   type="submit"
                   disabled={isAddressSubmitting}
-                  className="gap-2"
+                  className="gap-2 text-sm lg:text-base bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                 >
                   {isAddressSubmitting ? (
                     <>

@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Badge } from "./ui/badge";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
+import { useToast } from "@/components/ui/use-toast";
 
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -42,6 +43,7 @@ export default function ProductGrid({
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -86,8 +88,10 @@ export default function ProductGrid({
     try {
       if (isInWishlist(product._id)) {
         await removeFromWishlist(product._id);
+        toast({ description: `${product.name} removed from wishlist` });
       } else {
         await addToWishlist(product._id);
+        toast({ description: `${product.name} added to wishlist` });
       }
     } finally {
       setIsProcessing(false);
