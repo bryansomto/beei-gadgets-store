@@ -207,7 +207,7 @@ export default function AdminsPage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full gap-2"
+                    className="w-full gap-2 text-sm lg:text-base bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
                   >
                     {isSubmitting ? (
                       <>

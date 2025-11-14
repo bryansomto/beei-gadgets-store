@@ -392,7 +392,7 @@ export default function CategoriesPage() {
                     <Button
                       type="submit"
                       disabled={isSubmitting || !isDirty}
-                      className={`gap-2 ${
+                      className={`gap-2 text-sm lg:text-base bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100 ${
                         editedCategory ? "flex-1" : "w-full"
                       }`}
                     >

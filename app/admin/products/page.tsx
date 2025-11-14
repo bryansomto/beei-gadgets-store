@@ -118,7 +118,10 @@ export default function ProductsPage() {
               Manage your product inventory and listings
             </p>
           </div>
-          <Button onClick={handleAddNew} className="gap-2">
+          <Button
+            onClick={handleAddNew}
+            className="gap-2 text-sm lg:text-base bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-gray-100"
+          >
             <Plus className="h-4 w-4" />
             Add Product
           </Button>
