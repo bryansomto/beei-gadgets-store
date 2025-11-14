@@ -2,10 +2,11 @@
 import Layout from "./components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Activity, CreditCard, DollarSign, Users } from "lucide-react";
+import { Activity, CreditCard, Users } from "lucide-react";
 import { RecentSales } from "@/components/recent-sales";
 import { Overview } from "@/components/overview";
 import { useToast } from "@/components/ui/use-toast";
+import { IconCurrencyNaira } from "@tabler/icons-react";
 
 export default function Home() {
   const { toast } = useToast();
@@ -14,55 +15,40 @@ export default function Home() {
   const stats = [
     {
       title: "Total Revenue",
-      value: "₦45,231.89",
+      value: "₦1,564,900.00",
       change: "+20.1% from last month",
-      icon: DollarSign,
+      icon: IconCurrencyNaira,
     },
     {
       title: "Active Products",
-      value: "124",
-      change: "+12 from last month",
+      value: "4",
+      change: "+1 from last month",
       icon: CreditCard,
     },
     {
       title: "Categories",
-      value: "8",
+      value: "2",
       change: "+2 from last quarter",
       icon: Users,
     },
     {
       title: "Recent Activity",
-      value: "+573",
-      change: "+201 since last hour",
+      value: "+51",
+      change: "+12 since last hour",
       icon: Activity,
     },
   ];
 
   const recentSales = [
     {
-      name: "Wireless Earbuds",
+      name: "iPhone 16",
       email: "electronics",
-      amount: "+₦1,999.00",
+      amount: "+₦1,235,000.00",
     },
     {
-      name: "Leather Wallet",
+      name: "Samsung Galaxy S25 Ultra",
       email: "accessories",
-      amount: "+₦49.99",
-    },
-    {
-      name: "Smart Watch",
-      email: "electronics",
-      amount: "+₦299.99",
-    },
-    {
-      name: "Cotton T-Shirt",
-      email: "clothing",
-      amount: "+₦29.99",
-    },
-    {
-      name: "Ceramic Mug",
-      email: "home",
-      amount: "+₦12.99",
+      amount: "+₦1,900,000.00",
     },
   ];
 
