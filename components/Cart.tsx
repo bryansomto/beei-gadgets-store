@@ -92,7 +92,7 @@ export function Cart() {
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="flex justify-between items-center mt-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-2 sm:gap-0">
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Button
                         variant="outline"
@@ -121,7 +121,7 @@ export function Cart() {
                     </div>
 
                     <div className="flex-shrink-0 text-right">
-                      <p className="font-semibold text-sm md:text-base whitespace-nowrap">
+                      <p className="font-semibold text-base whitespace-nowrap">
                         {formatPrice(item.price * item.quantity)}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1 hidden sm:block">
