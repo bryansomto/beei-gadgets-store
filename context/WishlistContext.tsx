@@ -48,7 +48,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const addToWishlist = async (productId: string) => {
     try {
       await axios.post("/api/wishlist", { productId });
-      await fetchWishlist(); // Refresh the wishlist
+      await fetchWishlist();
     } catch (error) {
       console.error("Failed to add to wishlist:", error);
       throw error;

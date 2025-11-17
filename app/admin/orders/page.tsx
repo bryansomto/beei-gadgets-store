@@ -19,7 +19,6 @@ import { Check, X, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/formatPrice";
 
-// --- Interfaces ---
 interface OrderItem {
   productId: string;
   name: string;
@@ -84,7 +83,7 @@ export default function OrdersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]); // ✅ dependencies
+  }, [toast]);
 
   useEffect(() => {
     fetchOrders();

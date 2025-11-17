@@ -14,7 +14,6 @@ export async function POST(req: Request) {
 
     const data = await res.json();
 
-    // Check for success
     if (data.data?.status === "success") {
       await mongooseConnect();
 

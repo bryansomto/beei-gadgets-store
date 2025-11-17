@@ -12,7 +12,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 60 * 60 * 24 * 7, // 7 days
   },
   callbacks: {
-    // 🔐 Add data to the JWT token
+    // Add data to the JWT token
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
@@ -31,7 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token
     },
 
-    // 🧠 Make token values available to the client
+    // Make token values available to the client
     async session({ session, token, user }) {
       if (token) {
         session.user.id = token.id as string

@@ -15,7 +15,6 @@ export function Cart() {
     clearCart,
     cartTotal,
     cartCount,
-    // syncCartToDB is no longer needed here, but fine to keep
   } = useCart();
 
   return (

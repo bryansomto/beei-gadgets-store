@@ -51,7 +51,7 @@ export default function CartPageClient() {
   }
 
   if (!authenticated) {
-    return null; // Redirect will happen in useEffect
+    return null;
   }
 
   return (

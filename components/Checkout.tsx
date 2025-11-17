@@ -20,7 +20,6 @@ import { phoneSchema } from "@/lib/phoneSchema";
 import { formatPrice } from "@/lib/formatPrice";
 import Script from "next/script";
 
-// Define your form schema
 const addressSchema = z.object({
   name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
@@ -299,7 +298,6 @@ export default function CheckoutPage() {
           ref: orderData.reference,
           currency: "NGN",
           callback: function (response: { reference: string }) {
-            // ✅ Must be a plain function — not async
             console.log("Payment success response:", response);
 
             // Use an async IIFE inside to allow async/await safely
@@ -322,7 +320,6 @@ export default function CheckoutPage() {
           },
         });
 
-        // ✅ Use openIframe, not chargeCustomer
         paystack.openIframe();
       } else if (paymentMethod === "call_rep") {
         router.push(`/orders/confirmation/${orderData.orderId}`);

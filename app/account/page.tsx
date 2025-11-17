@@ -23,7 +23,6 @@ import * as z from "zod";
 import { phoneSchema } from "@/lib/phoneSchema";
 import { useToast } from "@/components/ui/use-toast";
 
-// Define your form schemas
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),

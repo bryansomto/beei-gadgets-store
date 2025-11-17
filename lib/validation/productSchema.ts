@@ -6,7 +6,7 @@ export const productSchema = z
     category: z.string().min(1, "Category is required"),
     images: z.array(z.string().url("Each image must be a valid URL")),
     description: z.string().min(1, "Description is required"),
-    price: z.coerce.number().min(0, "Price is required"), // Default price
+    price: z.coerce.number().min(0, "Price is required"),
     priceVariants: z
       .array(
         z.object({

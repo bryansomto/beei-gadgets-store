@@ -1,4 +1,3 @@
-// pages/api/register.ts
 import { User } from '@/models/User'
 import { saltAndHashPassword } from '@/lib/saltPassword'
 import { mongooseConnect } from '@/lib/mongoose'

@@ -2,8 +2,6 @@ import { mongooseConnect } from "@/lib/mongoose";
 import { Admin } from "@/models/Admin";
 import { NextRequest, NextResponse } from "next/server";
 
-
-// GET /api/admins - Fetch all admins
 export async function GET(request: Request) {
   try {
     await mongooseConnect();
@@ -39,7 +37,6 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/admins - Add a new admin
 export async function POST(req: NextRequest) {
     try {
       const { email } = await req.json();
@@ -64,8 +61,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-
-// DELETE /api/admins - Remove an admin
 export async function DELETE(req: NextRequest) {
   try {
     const url = new URL(req.url);

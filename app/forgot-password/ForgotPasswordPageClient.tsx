@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-// Define validation schema with Zod
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });

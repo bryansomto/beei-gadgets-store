@@ -94,7 +94,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         })();
       }, 500);
 
-      return Promise.resolve(); // explicitly return a resolved Promise
+      return Promise.resolve();
     },
     [user]
   );
@@ -142,7 +142,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
           const data = await res.json();
 
-          // Ensure the response matches our expected type
           if (data && Array.isArray(data.items)) {
             setCartItems(
               data.items.map(

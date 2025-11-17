@@ -76,7 +76,7 @@ function getDefaultLocale(currency: string): string {
   const localeMap: Record<string, string> = {
     NGN: 'en-NG',
     USD: 'en-US',
-    EUR: 'de-DE', // Germany uses comma as decimal separator
+    EUR: 'de-DE',
     GBP: 'en-GB',
     JPY: 'ja-JP',
     CNY: 'zh-CN'

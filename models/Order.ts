@@ -137,7 +137,7 @@ const OrderSchema = new Schema<IOrder>({
     immutable: true
   }
 }, {
-  timestamps: true, // Adds createdAt and updatedAt automatically
+  timestamps: true,
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
@@ -165,24 +165,6 @@ OrderSchema.virtual('createdAtFormatted').get(function(this: IOrder) {
 OrderSchema.index({ userEmail: 1 });
 OrderSchema.index({ status: 1 });
 OrderSchema.index({ createdAt: -1 });
-
-
-// ✅ Auto-generate unique order number
-// OrderSchema.pre<IOrder>("save", async function (next) {
-//   if (this.isNew && !this.orderNumber) {
-//     const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-//     const count = await (this.constructor as Model<IOrder>).countDocuments({
-//       createdAt: {
-//         $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-//         $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-//       },
-//     });
-
-//     const sequence = String(count + 1).padStart(4, "0");
-//     this.orderNumber = `ORD-${datePart}-${sequence}`;
-//   }
-//   next();
-// });
 
 OrderSchema.pre<IOrder>("save", async function (next) {
   if (this.isNew && !this.orderNumber) {

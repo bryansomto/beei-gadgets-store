@@ -173,7 +173,7 @@ export const SignOutButton = ({
         localStorage.setItem("cart", JSON.stringify(currentCart)); // Save to localStorage if cartItems is not passed (guest user)
       }
 
-      // ✅ Ensure cart is synced to DB
+      // Ensure cart is synced to DB
       if (syncCartToDB) {
         await syncCartToDB(currentCart);
       }

@@ -1,4 +1,3 @@
-// app/api/auth/forgot-password/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { User } from '@/models/User';
 import { PasswordResetToken } from '@/models/PasswordResetToken';
@@ -76,7 +75,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Add other HTTP methods if needed
 export async function GET() {
   return NextResponse.json(
     { error: 'Method not allowed' },

@@ -7,7 +7,7 @@ export interface IProduct extends Document {
   images: string[];
   category: mongoose.Types.ObjectId;
   properties: Record<string, string>;
-  isNewProduct?: boolean;  // Changed from 'isNew' to 'isNewProduct'
+  isNewProduct?: boolean;
   discount?: number;
   rating?: number;
   reviews?: number;
@@ -23,7 +23,7 @@ const ProductSchema = new Schema<IProduct>(
     images: [{ type: String }],
     category: { type: Schema.Types.ObjectId, ref: "Category" },
     properties: { type: Object },
-    isNewProduct: { type: Boolean, default: false },  // Updated here too
+    isNewProduct: { type: Boolean, default: false },
     discount: { type: Number, min: 0, max: 100 },
     rating: { type: Number, min: 0, max: 5, default: 0 },
     reviews: { type: Number, default: 0 },

@@ -26,7 +26,6 @@ export function ProductCard({ product }: ProductCardProps) {
     setIsAdding(true);
     try {
       await addToCart(product);
-      // Show success feedback
     } catch (error: unknown) {
       console.error("Error adding to cart:", error);
     } finally {

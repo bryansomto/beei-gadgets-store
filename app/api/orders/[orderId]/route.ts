@@ -9,7 +9,7 @@ export async function GET(
 ): Promise<NextResponse> {
   await mongooseConnect();
 
-  const { orderId } = await params; // ✅ Await because it's a promise in strict typing
+  const { orderId } = await params;
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     return NextResponse.json({ error: "Invalid order ID" }, { status: 400 });

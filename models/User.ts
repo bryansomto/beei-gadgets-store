@@ -51,7 +51,7 @@ const UserSchema = new Schema<IUser>(
     },
   },
   {
-    timestamps: true, // adds createdAt and updatedAt fields
+    timestamps: true,
     toJSON: {
       virtuals: true,
       transform: (doc, ret) => {

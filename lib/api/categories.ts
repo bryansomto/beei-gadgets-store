@@ -1,4 +1,3 @@
-// lib/api/categories.ts
 import { Category } from "@/types";
 
 export async function getCategories(): Promise<Category[]> {

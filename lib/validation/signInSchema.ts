@@ -1,4 +1,3 @@
-// /lib/validation/signInSchema.ts
 import { z } from "zod";
 
 export const signInSchema = z.object({

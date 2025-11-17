@@ -1,4 +1,3 @@
-// app/order/confirmation/[orderId]/page.tsx
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
@@ -106,7 +105,6 @@ const OrderTimeline = ({ status }: { status: Order["status"] }) => {
       {steps.map((step, index) => {
         const StepIcon = step.icon;
         const isCompleted = index <= currentStepIndex;
-        // const isCurrent = index === currentStepIndex;
 
         return (
           <div key={step.key} className="flex flex-col items-center">
@@ -138,7 +136,7 @@ const OrderTimeline = ({ status }: { status: Order["status"] }) => {
 export default async function OrderConfirmationPage(props: {
   params: Promise<{ orderId: string }>;
 }) {
-  const { orderId } = await props.params; // ✅ await here
+  const { orderId } = await props.params;
   const order = await getOrder(orderId);
 
   if (!order) {

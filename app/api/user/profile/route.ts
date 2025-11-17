@@ -1,11 +1,9 @@
-// app/api/user/profile/route.ts
 import { auth } from '@/auth';
 import { User } from '@/models/User';
 import { NextRequest, NextResponse } from 'next/server';
 import { mongooseConnect } from '@/lib/mongoose';
 import { phoneSchema } from '@/lib/phoneSchema';
 
-// PUT /api/user/profile - Update user profile
 export async function PUT(req: NextRequest) {
   try {
     await mongooseConnect();
@@ -42,7 +40,6 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    // Define a proper type instead of `any`
     interface UpdateData {
       firstName: string;
       lastName: string;
@@ -82,7 +79,6 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// GET /api/user/profile - Get user profile
 export async function GET() {
   try {
     await mongooseConnect();

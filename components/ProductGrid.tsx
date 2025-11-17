@@ -14,8 +14,6 @@ import { Badge } from "./ui/badge";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { useToast } from "@/components/ui/use-toast";
-
-// Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";

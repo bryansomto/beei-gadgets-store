@@ -1,4 +1,3 @@
-// @/lib/isUserAdmin.ts
 import {Admin} from "@/models/Admin";
 import { mongooseConnect } from "./mongoose";
 

@@ -1,4 +1,3 @@
-// GET /api/address
 import { auth } from '@/auth';
 import { Address } from '@/models/Address';
 import { NextRequest } from 'next/server';
@@ -13,7 +12,6 @@ export async function GET() {
   return Response.json(address || {});
 }
 
-// POST /api/address
 export async function POST(req: NextRequest) {
   const session = await auth();
   const data = await req.json();

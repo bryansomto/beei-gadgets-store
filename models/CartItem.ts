@@ -5,7 +5,7 @@ export interface ICartItem extends Document {
   productId: mongoose.Types.ObjectId | IProduct;
   quantity: number;
   price: number;
-  name?: string; // optional but included if cached
+  name?: string;
   image?: string;
 }
 

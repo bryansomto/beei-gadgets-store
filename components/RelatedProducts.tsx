@@ -43,9 +43,6 @@ export default function RelatedProducts({
 
         const response = await res.json();
 
-        // Handle both response formats:
-        // 1. { success: true, data: products[] }
-        // 2. Direct products array
         const products = Array.isArray(response?.data)
           ? response.data
           : Array.isArray(response?.products)

@@ -1,4 +1,3 @@
-// app/api/cart/route.ts
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { Cart } from "@/models/Cart";
@@ -62,7 +61,7 @@ export async function GET() {
 
     return NextResponse.json(
       { 
-        items,  // Must match CartItem[] type exactly
+        items,
         total: cart.total 
       }, 
       { status: 200 }

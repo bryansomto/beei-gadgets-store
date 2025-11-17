@@ -60,7 +60,7 @@ const AddressSchema = new Schema<IAddress>({
     trim: true
   }
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt
+  timestamps: true,
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {

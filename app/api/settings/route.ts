@@ -2,7 +2,6 @@ import { mongooseConnect } from "@/lib/mongoose";
 import { Setting } from "@/models/Setting";
 import { NextRequest, NextResponse } from "next/server";
 
-// Handler for GET request to fetch settings by name
 export async function GET(req: NextRequest) {
   try {
     const name = req.nextUrl.searchParams.get("name");
@@ -17,7 +16,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PUT handler
 export async function PUT(req: NextRequest) {
   try {
     const { name, value } = await req.json();

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Wishlist } from "@/models/Wishlist";
 import { auth } from "@/auth";
 import { mongooseConnect } from "@/lib/mongoose";
-import { IProduct } from "@/models/Product"; // ensure this interface exists
+import { IProduct } from "@/models/Product";
 
 interface WishlistRequest {
   productId: string;

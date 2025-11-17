@@ -43,20 +43,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDeleteItem } from "@/hooks/useDeleteItem";
 
-// ──────────────────────────────────────────────
-// TYPES
-// ──────────────────────────────────────────────
-
 interface Category {
   _id: string;
   name: string;
   parent?: { _id: string; name: string };
   properties: { name: string; values: string[] }[];
 }
-
-// ──────────────────────────────────────────────
-// MAIN COMPONENT
-// ──────────────────────────────────────────────
 
 export default function CategoriesPage() {
   const { toast } = useToast();
@@ -78,9 +70,6 @@ export default function CategoriesPage() {
     name: "properties",
   });
 
-  // ──────────────────────────────────────────────
-  // FETCH CATEGORIES
-  // ──────────────────────────────────────────────
   const fetchCategories = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -101,17 +90,11 @@ export default function CategoriesPage() {
     fetchCategories();
   }, [fetchCategories]);
 
-  // ──────────────────────────────────────────────
-  // DELETE HOOK
-  // ──────────────────────────────────────────────
   const { handleDelete, isDeleting } = useDeleteItem({
     resource: "categories",
     onDeleted: fetchCategories,
   });
 
-  // ──────────────────────────────────────────────
-  // FORM HANDLERS
-  // ──────────────────────────────────────────────
   const resetForm = useCallback(() => {
     setEditedCategory(null);
     reset({ name: "", parentCategory: "", properties: [] });
@@ -181,9 +164,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // ──────────────────────────────────────────────
-  // TABLE + BATCH LOGIC
-  // ──────────────────────────────────────────────
   const toggleSelection = useCallback((id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -211,10 +191,6 @@ export default function CategoriesPage() {
 
   const getPropertyCount = (category: Category) =>
     category.properties?.length || 0;
-
-  // ──────────────────────────────────────────────
-  // RENDER
-  // ──────────────────────────────────────────────
 
   return (
     <Layout requiresAuth>

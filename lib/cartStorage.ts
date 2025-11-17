@@ -1,6 +1,5 @@
 import { CartItem } from "@/types/cart";
 
-// utils/cartStorage.ts
 export const getGuestCart = () => {
     if (typeof window === "undefined") return [];
     try {

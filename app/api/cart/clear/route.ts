@@ -1,4 +1,3 @@
-// app/api/cart/clear/route.ts
 import { auth } from "@/auth";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Cart } from "@/models/Cart";
@@ -26,7 +25,6 @@ export async function DELETE() {
       return NextResponse.json({ message: "Cart not found" }, { status: 404 });
     }
 
-    // Strongly type item IDs instead of using `any`
     const itemIds = cart.items.map(
       (item: { _id: Types.ObjectId }) => item._id
     );
