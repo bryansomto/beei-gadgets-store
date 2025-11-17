@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 import { passwordSchema } from "@/lib/passwordSchema";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
-// Create a schema for the form
 const resetPasswordSchema = z
   .object({
     password: passwordSchema,

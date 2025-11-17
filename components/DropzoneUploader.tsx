@@ -1,4 +1,3 @@
-// components/DropzoneUploader.tsx
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { HashLoader } from "react-spinners";

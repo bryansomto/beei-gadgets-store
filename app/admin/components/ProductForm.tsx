@@ -402,9 +402,6 @@ export default function ProductForm({
                     htmlFor="upload-images"
                     className="w-24 h-24 cursor-pointer text-center flex items-center justify-center text-sm gap-1 text-gray-800 rounded-sm bg-white shadow-sm border border-gray-200 hover:text-base"
                   >
-                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
-                      <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                    </svg> */}
                     <Input
                       id="upload-images"
                       type="file"
